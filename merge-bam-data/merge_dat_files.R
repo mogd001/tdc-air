@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 library(plotly)
+library(hms)
 
 merge_dat_files <- function(files) {
   # Merge a list of .dat files with equal structure.
@@ -57,10 +58,14 @@ long_5min %>%
   write.csv(paste0("outputs/", day, "_long_5min_5028i.csv"))
 
 long_daily <- long %>%
+  select(-c(Time, Date)) %>% 
+  mutate(datetime = datetime - minutes(5),
+         Date = as.Date(datetime),
+         Time = as_hms(datetime)) %>% 
   group_by(Date) %>%
   mutate(pm10_daily_calc = mean(pm, na.rm = TRUE), pm2p5_daily_calc = mean(pmb, na.rm = TRUE)) %>%
   ungroup() %>%
-  subset(Time != "00:00:00") %>%
+  filter(Time != parse_time("23:55:00")) %>%
   select(Date, pm10_daily = avgpm, pm2p5_daily = avgpmb, pm10_daily_calc, pm2p5_daily_calc) %>%
   distinct() %>%
   mutate(
