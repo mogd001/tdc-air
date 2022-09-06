@@ -21,7 +21,7 @@ merge_dat_files <- function(files) {
     mutate(
       Date = mdy(Date),
       Time = hm(Time),
-      datetime = Date + Time,
+      datetime = force_tz(Date + Time, tz = "Etc/GMT+12"), # ignore timezone
       Time = format(datetime, format = "%H:%M:%S")
     ) %>%
     arrange(datetime) %>%
@@ -30,7 +30,10 @@ merge_dat_files <- function(files) {
 
 # Short and Long files. Short, is if the filename contains "short".
 directory <- "M:/Datafiles/Downloads&OtherSources/AIRQUALITY/Richmond/Plunket/5028i BAM/(024) 5028i Download 02-08-2022"
+download_name <- lapply(strsplit(directory, "/"), tail, n = 1) %>%  unlist()
+
 filenames <- list.files(directory, pattern = "*.dat", full.names = TRUE)
+
 
 short_filenames <- filenames[grepl("short", tolower(filenames))]
 long_filenames <- filenames[!grepl("short", tolower(filenames))]
@@ -39,10 +42,11 @@ day <- format(Sys.time(), "%Y%m%d")
 
 # save to csv
 short <- merge_dat_files(short_filenames) %>%
-  select(datetime, humidity = ambrh)
-short %>%
-  write.csv(paste0("outputs/", day, "_short_5028i.csv"))
-# only output selected columns
+  select(datetime, humidity = ambrh) %>% 
+  mutate(humidity = as.numeric(humidity))
+
+#short %>%
+#  write.csv(paste0("outputs/", download_name, "_short_5028i.csv"))
 
 long <- merge_dat_files(long_filenames) %>%
   mutate(
@@ -54,19 +58,24 @@ long <- merge_dat_files(long_filenames) %>%
 
 long_5min <- long %>%
   select(datetime, pm10 = pm, pm2p5 = pmb)
-long_5min %>%
-  write.csv(paste0("outputs/", day, "_long_5min_5028i.csv"))
+#long_5min %>%
+#  write.csv(paste0("outputs/", download_name, "_long_5min_5028i.csv"))
 
 long_daily <- long %>%
   select(-c(Time, Date)) %>% 
-  mutate(datetime = datetime - minutes(5),
+  mutate(datetime = datetime - minutes(5), #offset datetime by 5 minutes
          Date = as.Date(datetime),
          Time = as_hms(datetime)) %>% 
   group_by(Date) %>%
-  mutate(pm10_daily_calc = mean(pm, na.rm = TRUE), pm2p5_daily_calc = mean(pmb, na.rm = TRUE)) %>%
+  mutate(pm10_daily = ifelse(any(avgpm) > 1000 , 9999, avgpm),
+         pm2p5_daily = ifelse(any(avgpmb) > 1000, 9999, avgpmb),
+         pm10_daily_calc = mean(pm, na.rm = TRUE), 
+         pm2p5_daily_calc = mean(pmb, na.rm = TRUE),
+         ) %>%
   ungroup() %>%
   filter(Time != parse_time("23:55:00")) %>%
-  select(Date, pm10_daily = avgpm, pm2p5_daily = avgpmb, pm10_daily_calc, pm2p5_daily_calc) %>%
+  select(Date, pm10_daily, pm2p5_daily, pm10_daily_calc, pm2p5_daily_calc) %>%
+  mutate_if(is.numeric, round, 3) %>% 
   distinct() %>%
   mutate(
     pm10_daily_calc = lag(pm10_daily_calc),
@@ -75,8 +84,8 @@ long_daily <- long %>%
   ) %>%
   select(datetime, pm10_daily, pm2p5_daily, pm10_daily_calc, pm2p5_daily_calc)
 
-long_daily %>%
-  write.csv(paste0("outputs/", day, "_long_daily_5028i.csv"))
+#long_daily %>%
+#  write.csv(paste0("outputs/", download_name, "_long_daily_5028i.csv"))
 
 # visualise for testing
 short <- short %>%
@@ -90,5 +99,5 @@ p_long <- ggplot(long_5min, aes(datetime, pm10)) +
   geom_point(size = 1, color = "red") +
   scale_y_continuous(limits = c(0, NA))
 
-ggplotly(p_short)
-ggplotly(p_long)
+#ggplotly(p_short)
+#ggplotly(p_long)

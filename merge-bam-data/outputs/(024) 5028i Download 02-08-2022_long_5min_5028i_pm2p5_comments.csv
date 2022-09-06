@@ -1,0 +1,5 @@
+"","datetime","pm2p5","err","err_state_change","dur","err_type","start_datetime","duration","end_datetime","comment"
+"1",2022-04-06 20:00:00,-20.63,1,1,1,1,2022-04-06 20:00:00,5M 0S,2022-04-06 20:05:00,"Missing record for duration 5M 0S from 2022-04-06 20:00:00 to 2022-04-06 20:05:00 due to due to value less than -20."
+"2",2022-04-28 16:40:00,-22.5279,1,1,4,1,2022-04-28 16:40:00,20M 0S,2022-04-28 17:00:00,"Missing record for duration 20M 0S from 2022-04-28 16:40:00 to 2022-04-28 17:00:00 due to due to value less than -20."
+"3",2022-06-22 07:55:00,NA,1,1,9,3,2022-06-22 07:55:00,45M 0S,2022-06-22 08:40:00,"Missing record for duration 45M 0S from 2022-06-22 07:55:00 to 2022-06-22 08:40:00 due to Watercare undertaking instrument audit (power off)."
+"4",2022-06-22 08:55:00,-37.9889,1,1,41,1,2022-06-22 08:55:00,205M 0S,2022-06-22 12:20:00,"Missing record for duration 205M 0S from 2022-06-22 08:55:00 to 2022-06-22 12:20:00 due to due to value less than -20."
