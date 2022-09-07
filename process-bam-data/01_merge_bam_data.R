@@ -3,6 +3,34 @@ library(lubridate)
 library(plotly)
 library(hms)
 
+##### Merge BAM (Beta Attenuation Mass/Monitor) Data #####
+
+# Matt Ogden, September 2022
+
+# Merges bam data downloaded from 5028i BAM Richmond at Plunket.
+# Short - 30 minute
+# Long - 5 minute pm10 and pm2.5 data
+
+# Processing directory (where .dat files are located)
+directory <- "M:/Datafiles/Downloads&OtherSources/AIRQUALITY/Richmond/Plunket/5028i BAM/(024) 5028i Download 02-08-2022"
+
+##################
+
+# Check if "merged" folder exists in directory
+if (dir.exists(paste0(directory,"/merged"))){
+  unlink(paste0(directory,"/merged"), recursive = TRUE)
+  Sys.sleep(2) # give time for the removal of the directory to take place
+} 
+dir.create(paste0(directory,"/merged"))
+
+# Clear outputs folder
+if (dir.exists("outputs")){
+  unlink("outputs", recursive = TRUE)
+  Sys.sleep(2) # give time for the removal of the directory to take place
+} 
+dir.create("outputs")
+
+
 merge_dat_files <- function(files) {
   # Merge a list of .dat files with equal structure.
   merge_df <- NULL
@@ -21,19 +49,18 @@ merge_dat_files <- function(files) {
     mutate(
       Date = mdy(Date),
       Time = hm(Time),
-      datetime = force_tz(Date + Time, tz = "Etc/GMT+12"), # ignore timezone
-      Time = format(datetime, format = "%H:%M:%S")
+      datetime = force_tz(Date + Time, tz = "Etc/GMT+12"),
+      time = format(datetime, format = "%H:%M:%S")
     ) %>%
     arrange(datetime) %>%
     tibble()
 }
 
 # Short and Long files. Short, is if the filename contains "short".
-directory <- "M:/Datafiles/Downloads&OtherSources/AIRQUALITY/Richmond/Plunket/5028i BAM/(024) 5028i Download 02-08-2022"
+
 download_name <- lapply(strsplit(directory, "/"), tail, n = 1) %>%  unlist()
 
 filenames <- list.files(directory, pattern = "*.dat", full.names = TRUE)
-
 
 short_filenames <- filenames[grepl("short", tolower(filenames))]
 long_filenames <- filenames[!grepl("short", tolower(filenames))]
@@ -88,16 +115,13 @@ long_daily <- long %>%
 #  write.csv(paste0("outputs/", download_name, "_long_daily_5028i.csv"))
 
 # visualise for testing
-short <- short %>%
-  mutate(humidity = as.numeric(humidity))
-
 p_short <- ggplot(short, aes(datetime, humidity)) +
   geom_point(size = 1, color = "blue") +
   scale_y_continuous(limits = c(0, NA))
 
 p_long <- ggplot(long_5min, aes(datetime, pm10)) +
   geom_point(size = 1, color = "red") +
-  scale_y_continuous(limits = c(0, NA))
+  scale_y_continuous(limits = c(0, NA), expand = c(0, 0))
 
 #ggplotly(p_short)
 #ggplotly(p_long)

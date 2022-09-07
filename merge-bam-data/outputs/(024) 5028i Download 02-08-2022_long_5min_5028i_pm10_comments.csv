@@ -1,4 +1,0 @@
-"","datetime","pm10","err","err_state_change","dur","err_type","start_datetime","duration","end_datetime","comment"
-"1",2022-04-06 18:10:00,-21.9373,1,1,2,1,2022-04-06 18:10:00,10M 0S,2022-04-06 18:20:00,"Missing record for duration 10M 0S from 2022-04-06 18:10:00 to 2022-04-06 18:20:00 due to due to value less than -20."
-"2",2022-06-22 07:55:00,NA,1,1,9,3,2022-06-22 07:55:00,45M 0S,2022-06-22 08:40:00,"Missing record for duration 45M 0S from 2022-06-22 07:55:00 to 2022-06-22 08:40:00 due to Watercare undertaking instrument audit (power off)."
-"3",2022-06-22 08:55:00,-66.7406,1,1,43,2,2022-06-22 08:55:00,215M 0S,2022-06-22 12:30:00,"Missing record for duration 215M 0S from 2022-06-22 08:55:00 to 2022-06-22 12:30:00 due to Watercare undertaking instrument audit."

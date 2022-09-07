@@ -4,11 +4,17 @@ library(Hilltop)
 library(broom)
 library(plotly)
 library(zeallot)
-source("merge_bam_data.R")
 library(lubridate)
 library(glue)
 
-# from
+##### CLEAN BAM (Beta Attenuation Mass/Monitor) Data #####
+
+# Matt Ogden, September 2022
+
+# Cleans bam data downloaded from 5028i BAM Richmond at Plunket.
+
+# continue from 01_merge_bam_data.R
+source("01_merge_bam_data.R")
 long_5min
 long_daily
 short
@@ -215,5 +221,9 @@ long_5min_pm2p5_gaps %>%
   write.csv(paste0("outputs/", download_name, "_long_5min_5028i_pm2p5_comments.csv"))
 
 # TODO
-# carry on with cleaning procedure as per Matts email.
+# carry on with cleaning procedure as per Matt's email.
 
+
+# Copy outputs to original directory under merged folder
+list_of_files <- list.files("outputs", ".csv") 
+file.copy(file.path("outputs", list_of_files), paste0(directory,"/merged"))
