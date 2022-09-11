@@ -7,17 +7,21 @@ library(zeallot)
 library(lubridate)
 library(glue)
 
-##### CLEAN BAM (Beta Attenuation Mass/Monitor) Data #####
-
+##### Clean BAM (Beta Attenuation Mass/Monitor) Data #####
+#
 # Matt Ogden, September 2022
-
+#
 # Cleans bam data downloaded from 5028i BAM Richmond at Plunket.
 
 # continue from 01_merge_bam_data.R
 source("01_merge_bam_data.R")
+short
 long_5min
 long_daily
-short
+
+p_short
+p_long_5min
+p_long_daily
 
 long_30min <- long_5min %>%
   mutate(datetime = floor_date(long_5min$datetime, "30 minutes") + minutes(30)) %>%

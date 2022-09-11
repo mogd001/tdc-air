@@ -1,0 +1,4 @@
+example_wind_data copied from AQ Riwaka at Brooklyn
+speed converted to km/hr (spd_orig still in m/s)
+
+"\\tsrvfiles\HYDROLOGY\Datafiles\Downloads&OtherSources\AIRQUALITY\Riwaka\Archived Data provided by Mote\csv\Brooklyn Wind Winter 2021 Mote.csv"

@@ -2,11 +2,12 @@ library(tidyverse)
 library(lubridate)
 library(plotly)
 library(hms)
+library(patchwork)
 
 ##### Merge BAM (Beta Attenuation Mass/Monitor) Data #####
-
+#
 # Matt Ogden, September 2022
-
+#
 # Merges bam data downloaded from 5028i BAM Richmond at Plunket.
 # Short - 30 minute
 # Long - 5 minute pm10 and pm2.5 data
@@ -116,12 +117,38 @@ long_daily <- long %>%
 
 # visualise for testing
 p_short <- ggplot(short, aes(datetime, humidity)) +
-  geom_point(size = 1, color = "blue") +
-  scale_y_continuous(limits = c(0, NA))
+  geom_point(size = 0.7, color = "blue") +
+  labs(x = "", y = "Humidity (%)") + 
+  scale_y_continuous(limits = c(0, NA)) + 
+  scale_x_datetime(date_labels = "%Y-%b") +
+  theme_bw()
 
-p_long <- ggplot(long_5min, aes(datetime, pm10)) +
-  geom_point(size = 1, color = "red") +
-  scale_y_continuous(limits = c(0, NA), expand = c(0, 0))
+p1 <- ggplot(long_5min, aes(datetime, pm10)) +
+  geom_point(size = 0.7, color = "red") +
+  labs(x = "", y = "PM10 (ug/m3)") + 
+  scale_y_continuous(limits = c(0, max(long_5min$pm10) * 1.05), expand = c(0, 0)) + 
+  scale_x_datetime(date_labels = "%Y-%b") + 
+  theme_bw() + 
+  theme(axis.title.x = element_blank(), 
+        axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+  
+p2 <- ggplot(long_5min, aes(datetime, pm2p5)) +
+  geom_point(size = 0.7, color = "orange") +
+  labs(x = "", y = "PM2.5 (ug/m3)") + 
+  scale_y_continuous(limits = c(0, max(long_5min$pm10) * 1.05), expand = c(0, 0)) + 
+  scale_x_datetime(date_labels = "%Y-%b") + 
+  theme_bw()
 
-#ggplotly(p_short)
-#ggplotly(p_long)
+p_long_5min <- p1 / p2 
+
+p_long_daily <- ggplot(long_daily)  +
+  geom_line(mapping = aes(datetime, pm10_daily, color = "PM10"), size = 0.7) +
+  geom_line(mapping = aes(datetime, pm2p5_daily, color = "PM2.5"), size = 0.7) +
+  labs(x = "", y = "PM (ug/m3)") + 
+  scale_color_manual(name = "Legend", values = c("PM10" = "red", "PM2.5" = "orange")) + 
+  scale_x_datetime(date_labels = "%Y-%b") + 
+  scale_y_continuous(limits = c(0, NA), expand = c(0, 0)) + 
+  theme_bw()
+
+rm(long)
