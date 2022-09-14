@@ -11,7 +11,7 @@ library(glue)
 #
 # Matt Ogden, September 2022
 #
-# Cleans bam data downloaded from 5028i BAM Richmond at Plunket.
+# Cleans bam data downloaded from 5028i BAM Richmond Central at Plunket.
 
 # continue from 01_merge_bam_data.R
 source("01_merge_bam_data.R")
@@ -35,7 +35,7 @@ start_datetime <- min(long_5min$datetime)
 end_datetime <- max(long_5min$datetime)
 
 start_date <- gsub("-", "", as.Date(start_datetime))
-end_date <- gsub("-", "", as.Date(end_datetime) + days(1))
+end_date <- gsub("-", "", as.Date(end_datetime))
 
 # raw telemetry
 hts_file <- HilltopData(r"{\\tsrvfiles\hydrology\Datafiles\RawTelem_Concatenated.dsn}")

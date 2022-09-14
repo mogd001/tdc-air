@@ -8,7 +8,7 @@ library(patchwork)
 #
 # Matt Ogden, September 2022
 #
-# Merges bam data downloaded from 5028i BAM Richmond at Plunket.
+# Merges bam data downloaded from 5028i BAM Richmond Central at Plunket.
 # Short - 30 minute
 # Long - 5 minute pm10 and pm2.5 data
 
