@@ -6,6 +6,9 @@ library(plotly)
 library(zeallot)
 library(lubridate)
 library(glue)
+library(patchwork)
+
+source("functions.R")
 
 ##### Clean BAM (Beta Attenuation Mass/Monitor) Data #####
 #
@@ -18,10 +21,6 @@ source("01_merge_bam_data.R")
 short
 long_5min
 long_daily
-
-p_short
-p_long_5min
-p_long_daily
 
 long_30min <- long_5min %>%
   mutate(datetime = floor_date(long_5min$datetime, "30 minutes") + minutes(30)) %>%
@@ -57,19 +56,18 @@ disconnect(hts_file)
 #  rename(pm2p5 = value)
 
 ##### Step 1 - comparison to raw telemetry
-p1 <- ggplot() +
+p_rawtelemetry <- ggplot() +
   geom_line(long_5min, mapping = aes(datetime, pm2p5, color = "downloaded (5 min)")) +
   geom_line(long_30min, mapping = aes(datetime, pm2p5, color = "downloaded (5min -> 30min)")) +
   geom_line(telem_data, mapping = aes(datetime, pm2p5, color = "telemetry (30 min)")) +
   scale_y_continuous(limits = c(-50, NA)) +
   scale_color_manual(values = c("black", "blue", "red")) +
-  labs(x = "Datetime", y = "PM2.5", color = "PM2.5 Source") +
+  labs(x = "Datetime", y = "PM2.5 (ug/m3)", color = "PM2.5 Source") +
   theme(legend.position = "right") +
   theme_bw()
 
-
+ggsave("outputs/telemetry_comparison.png", plot = p_rawtelemetry, width = 12)
 ggplotly(p1)
-
 
 pm2p5_30min_diff <- telem_data %>%
   left_join(long_30min, by = "datetime", suffix = c("", "_download")) %>%
@@ -79,18 +77,19 @@ pm2p5_30min_diff <- telem_data %>%
   ) %>%
   drop_na()
 
-p2 <- ggplot(pm2p5_30min_diff, mapping = aes(datetime, pm2p5_30min_diff, color = "telemetry - downloaded (30min)")) +
+p_telemetrycomparison <- ggplot(pm2p5_30min_diff, mapping = aes(datetime, pm2p5_30min_diff, color = "telemetry - downloaded (30min)")) +
   geom_line() +
   geom_smooth(color = "black", se = FALSE) +
   scale_y_continuous(limits = c(-5, 5)) +
-  labs(x = "Datetime", y = "PM2.5", color = "Legend") +
+  labs(x = "Datetime", y = "PM2.5 (ug/m3)", color = "Legend") +
   theme(legend.position = "right") +
   theme_bw()
 
-ggplotly(p2)
-summary(pm2p5_30min_diff)
+ggplotly(p_telemetrycomparison)
+summary(p_telemetrycomparison)
 
 ##### Step 2 - cleaning
+##### Long 5 Minute
 long_5min_with_err <- tibble(datetime = seq(start_datetime, end_datetime, by = "5 min")) %>% # make sure we have a complete initial 5 minute dataset between the start and end dates.
   left_join(long_5min, by = "datetime") %>%
   pivot_longer(
@@ -114,37 +113,6 @@ long_5min_with_err <- tibble(datetime = seq(start_datetime, end_datetime, by = "
   ) %>%
   rename_with(~ sub("_value", "", .x), everything())
 
-clean_long_5min_data <- function(df) {
-  # Clean up long data (adding gaps and 0's).
-  gaps <- df %>% filter(err == 1 & err_state_change == 1)
-
-  gap_start <- gaps %>%
-    select(datetime, err_type, dur) %>%
-    transmute(
-      datetime = datetime - minutes(5) + seconds(1),
-      pm = 0
-    )
-
-  gap_end <- gaps %>%
-    select(datetime, dur) %>%
-    filter(dur > 1) %>%
-    mutate(
-      datetime = datetime + (dur - 1) * minutes(5),
-      pm = 0
-    ) %>%
-    select(-dur)
-
-  df_cleaned <- df %>%
-    filter(!(err == 1 & err_state_change != 1)) %>% # filter error runs excluding start which become "gaps"
-    mutate(
-      pm = ifelse(err == 1, NA, pm)
-    ) %>%
-    select(datetime, pm) %>%
-    bind_rows(list(gap_start, gap_end)) %>%
-    arrange(datetime)
-
-  list(df_cleaned, gaps)
-}
 
 # PM10
 long_5min_pm10 <- long_5min_with_err %>%
@@ -195,28 +163,6 @@ long_5min_pm2p5_cleaned %>%
   replace(is.na(.), "") %>%
   write.csv(paste0("outputs/", download_name, "_long_5min_5028i_pm2p5_cleaned.csv"))
 
-# generate comments from gaps
-generate_long_5min_comment <- function(gap) {
-  # Generate comments for errors.
-  base_string <- "Missing records for duration {duration} from {start_datetime} to {end_datetime} due to {reason}."
-  
-  gap %>%
-    mutate(
-      start_datetime = datetime,
-      duration = dur * minutes(5), # convert to hours
-      end_datetime = datetime + dur * minutes(5),
-      comment = ifelse(err_type == 1, glue(base_string, reason = "due to value less than -20"),
-                       ifelse(err_type == 2 & duration > minutes(30), glue(base_string, reason = "Watercare undertaking instrument audit"),
-                              ifelse(err_type == 2, glue(base_string, reason = "due to value less than -50"),
-                                     ifelse(err_type == 3, glue(base_string, reason = "Watercare undertaking instrument audit (power off)"),
-                                            "Other error type, please inspect further."
-                                     )
-                              )
-                       )
-      )
-    )
-}
-
 long_5min_pm10_gaps %>%
   generate_long_5min_comment() %>%
   write.csv(paste0("outputs/", download_name, "_long_5min_5028i_pm10_comments.csv"))
@@ -224,10 +170,92 @@ long_5min_pm2p5_gaps %>%
   generate_long_5min_comment() %>% 
   write.csv(paste0("outputs/", download_name, "_long_5min_5028i_pm2p5_comments.csv"))
 
-# TODO
-# carry on with cleaning procedure as per Matt's email.
+# Generate graph comparing raw vs processed 5 minute data
+long_5min
+p_long_5min
 
+long_5min_cleaned <- long_5min_pm10_cleaned %>% 
+  left_join(long_5min_pm2p5_cleaned, by = "datetime")
+
+p3 <- ggplot(long_5min_cleaned, aes(datetime, pm10)) +
+  geom_point(size = 0.7, color = "red") +
+  labs(x = "", y = "PM10 (ug/m3)", title = "PM10 Cleaned (5 minute)") + 
+  scale_y_continuous(limits = c(-50, max(long_5min$pm10) * 1.05), expand = c(0, 0)) + 
+  scale_x_datetime(date_labels = "%Y-%b") + 
+  theme_bw() + 
+  theme(axis.title.x = element_blank(), 
+        axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank())
+
+p4 <- ggplot(long_5min_cleaned, aes(datetime, pm2p5)) +
+  geom_point(size = 0.7, color = "orange") +
+  labs(x = "", y = "PM2.5 (ug/m3)", title = "PM2.5 Cleaned (5 minute)") + 
+  scale_y_continuous(limits = c(-50, max(long_5min$pm2p5) * 1.05), expand = c(0, 0)) + 
+  scale_x_datetime(date_labels = "%Y-%b") + 
+  theme_bw()
+
+p_long_5min_comparison <- (p1 / p2) | (p3 / p4) 
+ggsave("outputs/long_5min_comparison.png", plot = p_long_5min_comparison, width = 12)
+
+##### Long Daily
+
+# PM10
+long_daily_pm10 <- long_daily %>% 
+  transmute(
+    datetime,
+    date,
+    pm = pm10_daily,
+    pm_calc = pm10_daily_calc
+  )
+
+df_5min_cleaned <- long_5min_pm10_cleaned %>% rename(pm = pm10)
+gaps <- long_5min_pm10_gaps %>% rename(pm = pm10) %>% 
+  select(datetime, dur) %>% 
+  mutate(date = as.Date(datetime, tz = "Etc/GMT+12"))
+
+long_daily_pm10_cleaned <- clean_long_daily_data(long_daily_pm10, df_5min_cleaned, gaps)
+long_daily_pm10_cleaned <- long_daily_pm10_cleaned %>%
+  rename(pm10 = pm)
+
+long_daily_pm10_cleaned %>% mutate_at("pm10", as.character) %>%
+  replace(is.na(.), "") %>%
+  write.csv(paste0("outputs/", download_name, "_long_daily_5028i_pm10_cleaned.csv"))
+
+# PM2p5
+long_daily_pm2p5 <- long_daily %>% 
+  transmute( 
+  datetime,
+  date,
+  pm = pm2p5_daily,
+  pm_calc = pm2p5_daily_calc
+  )
+
+df_5min_cleaned <- long_5min_pm2p5_cleaned %>% rename(pm = pm2p5)
+gaps <- long_5min_pm2p5_gaps %>% rename(pm = pm2p5) %>% 
+  select(datetime, dur) %>% 
+  mutate(date = as.Date(datetime, tz = "Etc/GMT+12"))
+
+long_daily_pm2p5_cleaned <- clean_long_daily_data(long_daily_pm2p5, df_5min_cleaned, gaps)
+long_daily_pm2p5_cleaned <- long_daily_pm2p5_cleaned %>%
+  rename(pm2p5 = pm)  
+
+long_daily_pm2p5_cleaned %>%
+  mutate_at("pm2p5", as.character) %>%
+  replace(is.na(.), "") %>%
+  write.csv(paste0("outputs/", download_name, "_long_daily_5028i_pm2p5_cleaned.csv"))
+
+p_long_daily_cleaned <- ggplot()  +
+  geom_step(data = long_daily_pm10_cleaned, aes(datetime, pm10, color = "PM10"), size = 0.5) +
+  geom_step(data = long_daily_pm2p5_cleaned, aes(datetime, pm2p5, color = "PM2.5"), size = 0.5) +
+  labs(x = "", y = "PM (ug/m3)", title = "PM Daily Cleaned") + 
+  scale_color_manual(name = "Legend", values = c("PM10" = "red", "PM2.5" = "orange")) + 
+  scale_x_datetime(date_labels = "%Y-%b") + 
+  scale_y_continuous(limits = c(0, 60), expand = c(0, 1)) + 
+  theme_bw()
+
+p_long_daily_comparison <- p_long_daily_raw | p_long_daily_cleaned
+ggsave("outputs/long_daily_comparison.png", plot = p_long_daily_comparison, width = 12)
 
 # Copy outputs to original directory under merged folder
-list_of_files <- list.files("outputs", ".csv") 
+list_of_files <- list.files("outputs", ".csv|.png") 
 file.copy(file.path("outputs", list_of_files), paste0(directory,"/merged"))
