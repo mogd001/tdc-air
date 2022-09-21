@@ -1,0 +1,4 @@
+datetime,pm2p5,err,err_state_change,dur,err_type,start_datetime,duration,end_datetime,comment
+2022-08-11T04:35:00Z,-20.6362,1,1,4,1,2022-08-11T04:35:00Z,20,2022-08-11T04:55:00Z,Missing record for 20 minutes from 10/08/2022 1635 to 10/08/2022 1655 due to value less than -20.
+2022-08-31T23:00:00Z,-32.4312,1,1,10,1,2022-08-31T23:00:00Z,50,2022-08-31T23:50:00Z,Missing record for 50 minutes from 31/08/2022 1100 to 31/08/2022 1150 due to value less than -20.
+2022-09-01T00:10:00Z,-9648.86,1,1,43,2,2022-09-01T00:10:00Z,215,2022-09-01T03:45:00Z,Missing record for 215 minutes from 31/08/2022 1210 to 31/08/2022 1545 due to value less than -50.
