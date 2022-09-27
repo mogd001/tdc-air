@@ -349,16 +349,15 @@ short %>%
 list_of_files <- list.files("outputs", ".csv|.png|.txt")
 file.copy(file.path("outputs", list_of_files), paste0(directory, "/merged"))
 
-# Insert comments into sql database directly.
-# comments_5min_pm10 %>% insert_comments_to_envmon(measurement = "5min_pm10")
-# comments_5min_pm2p5 %>% insert_comments_to_envmon(measurement = "5min_pm2p5")
-# comments_daily_pm10 %>% 
-#   mutate(datetime = date + hours(12)) %>% 
-#   insert_comments_to_envmon(measurement = "daily_pm10")
-# comments_daily_pm2p5 %>% 
-#   mutate(datetime = date + hours(12)) %>% 
-#   insert_comments_to_envmon(measurement = "daily_pm2p5")
-  
+# Insert comments into sql database directly
+comments_5min_pm10 %>% insert_comments_to_envmon(measurement = "5min_pm10")
+comments_5min_pm2p5 %>% insert_comments_to_envmon(measurement = "5min_pm2p5")
+comments_daily_pm10 %>% 
+  mutate(datetime = date + hours(12)) %>% 
+  insert_comments_to_envmon(measurement = "daily_pm10")
+comments_daily_pm2p5 %>% 
+  mutate(datetime = date + hours(12)) %>% 
+  insert_comments_to_envmon(measurement = "daily_pm2p5")
+
 # TODO
 # Insert into hts file directly - to explore further.
-  
