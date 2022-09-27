@@ -53,7 +53,7 @@ clean_long_5min_data <- function(df) {
   df_cleaned <- df %>%
     filter(!(err == 1 & err_state_change != 1)) %>% # filter error runs excluding start which become "gaps"
     mutate(
-      pm = ifelse(err == 1, NA, pm)
+      pm = ifelse(err == 1, NA, round(pm, 1))
     ) %>%
     select(datetime, pm) %>%
     bind_rows(list(gap_start, gap_end)) %>%

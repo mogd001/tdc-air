@@ -41,9 +41,13 @@ day <- format(Sys.time(), "%Y%m%d")
 
 # save to csv
 short <- merge_dat_files(short_filenames) %>%
-  select(datetime, humidity = ambrh) %>%
-  mutate(humidity = as.numeric(humidity))
-
+  transmute(datetime, 
+         voltage = as.numeric(fvol),
+         air_temp = as.numeric(ambtemp),
+         baro = as.numeric(baro), 
+         humidity = as.numeric(ambrh),
+         air_temp_internal = as.numeric(ftemp),
+         voltage_backup = as.numeric(fvolb))
 
 long <- merge_dat_files(long_filenames) %>%
   mutate(

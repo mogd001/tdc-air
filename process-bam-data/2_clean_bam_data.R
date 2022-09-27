@@ -232,6 +232,7 @@ long_daily_pm10_cleaned <- long_daily_pm10_cleaned %>%
   rename(pm10 = pm)
 
 long_daily_pm10_cleaned %>%
+  mutate(pm10 = round(pm10, 0)) %>% 
   mutate_at("pm10", as.character) %>%
   replace(is.na(.), "") %>%
   mutate(datetime = format(datetime, format="%Y-%m-%d %H:%M:%S")) %>% 
@@ -267,6 +268,7 @@ long_daily_pm2p5_cleaned <- long_daily_pm2p5_cleaned %>%
   rename(pm2p5 = pm)
 
 long_daily_pm2p5_cleaned %>%
+  mutate(pm2p5 = round(pm2p5, 1)) %>% 
   mutate_at("pm2p5", as.character) %>%
   replace(is.na(.), "") %>%
   mutate(datetime = as.character(format(datetime, format="%Y-%m-%d %H:%M:%S"))) %>% 
@@ -339,6 +341,7 @@ write_lines(kable(summary(d2 %>% filter(pm2p5 > 0))), file("outputs/daily_summar
 
 # Save short data
 short %>% 
+  mutate(across(where(is.numeric), ~ round(.x, 1))) %>% 
   mutate(datetime = format(datetime, format="%Y-%m-%d %H:%M:%S")) %>% 
   write_csv(paste0("outputs/", download_name, "_short_30min_5028i.csv"))
 
@@ -347,14 +350,14 @@ list_of_files <- list.files("outputs", ".csv|.png|.txt")
 file.copy(file.path("outputs", list_of_files), paste0(directory, "/merged"))
 
 # Insert comments into sql database directly.
-comments_5min_pm10 %>% insert_comments_to_envmon(measurement = "5min_pm10")
-comments_5min_pm2p5 %>% insert_comments_to_envmon(measurement = "5min_pm2p5")
-comments_daily_pm10 %>% 
-  mutate(datetime = date + hours(12)) %>% 
-  insert_comments_to_envmon(measurement = "daily_pm10")
-comments_daily_pm2p5 %>% 
-  mutate(datetime = date + hours(12)) %>% 
-  insert_comments_to_envmon(measurement = "daily_pm2p5")
+# comments_5min_pm10 %>% insert_comments_to_envmon(measurement = "5min_pm10")
+# comments_5min_pm2p5 %>% insert_comments_to_envmon(measurement = "5min_pm2p5")
+# comments_daily_pm10 %>% 
+#   mutate(datetime = date + hours(12)) %>% 
+#   insert_comments_to_envmon(measurement = "daily_pm10")
+# comments_daily_pm2p5 %>% 
+#   mutate(datetime = date + hours(12)) %>% 
+#   insert_comments_to_envmon(measurement = "daily_pm2p5")
   
 # TODO
 # Insert into hts file directly - to explore further.
