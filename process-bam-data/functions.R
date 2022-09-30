@@ -164,7 +164,7 @@ generate_long_daily_comments <- function(gaps) {
   comments <- gaps %>%
     mutate(
       duration = dur * 5, # convert to minutes
-      duration_hours = round(duration/60, 2),
+      duration_hours = round(duration / 60, 2),
       comment = ifelse(err_type == 1, glue(err_type_1_base_string),
         ifelse(err_type == 2, glue(err_type_2_base_string), NA)
       )
@@ -200,9 +200,9 @@ insert_comments_to_envmon <- function(comments, measurement = c("5min_pm10", "5m
       Link = NA
     ) %>%
     relocate(Comment, .after = Measurement)
-  # Remove timezone    
+  # Remove timezone
   comments_to_insert$CommentDate <- force_tz(comments_to_insert$CommentDate, tzone = "UTC")
-  
+
   conn <- dbConnect(odbc::odbc(),
     Driver = "SQL Server",
     Server = "TSRVSQL14",
@@ -214,7 +214,7 @@ insert_comments_to_envmon <- function(comments, measurement = c("5min_pm10", "5m
   dbBegin(conn)
   dbWriteTable(conn, "tbl_Comments", comments_to_insert, append = TRUE)
   dbCommit(conn)
-  
+
   # close db connection
   dbDisconnect(conn)
 }

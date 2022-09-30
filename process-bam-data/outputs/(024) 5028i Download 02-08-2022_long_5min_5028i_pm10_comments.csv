@@ -1,4 +1,0 @@
-datetime,pm10,err,err_state_change,dur,err_type,start_datetime,duration,end_datetime,comment
-2022-04-07T06:10:00Z,-21.9373,1,1,2,1,2022-04-07T06:10:00Z,10,2022-04-07T06:20:00Z,Missing record for 10 minutes from 06/04/2022 1810 to 06/04/2022 1820 due to value less than -20.
-2022-06-22T19:55:00Z,NA,1,1,9,3,2022-06-22T19:55:00Z,45,2022-06-22T20:40:00Z,Missing record for 45 minutes from 22/06/2022 0755 to 22/06/2022 0840 due to Watercare undertaking instrument audit (power off).
-2022-06-22T20:55:00Z,-66.7406,1,1,43,2,2022-06-22T20:55:00Z,215,2022-06-23T00:30:00Z,Missing record for 215 minutes from 22/06/2022 0855 to 22/06/2022 1230 due to value less than -50.
