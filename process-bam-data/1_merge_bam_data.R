@@ -41,13 +41,14 @@ day <- format(Sys.time(), "%Y%m%d")
 
 # save to csv
 short <- merge_dat_files(short_filenames) %>%
-  transmute(datetime, 
-         voltage = as.numeric(fvol),
-         air_temp = as.numeric(ambtemp),
-         baro = as.numeric(baro), 
-         humidity = as.numeric(ambrh),
-         air_temp_internal = as.numeric(ftemp),
-         voltage_backup = as.numeric(fvolb))
+  transmute(datetime,
+    voltage = as.numeric(fvol),
+    air_temp = as.numeric(ambtemp),
+    baro = as.numeric(baro),
+    humidity = as.numeric(ambrh),
+    air_temp_internal = as.numeric(ftemp),
+    voltage_backup = as.numeric(fvolb)
+  )
 
 long <- merge_dat_files(long_filenames) %>%
   mutate(
@@ -97,7 +98,9 @@ p_short <- ggplot(short, aes(datetime, humidity)) +
 
 p1 <- ggplot(long_5min, aes(datetime, pm10)) +
   geom_point(size = 0.7, color = "red") +
-  labs(x = "", y = expression(PM10~(mu*g/m^{3})), title = "PM10 Raw (5 minute)") +
+  labs(x = "", y = expression(PM10 ~ (mu * g / m^{
+    3
+  })), title = "PM10 Raw (5 minute)") +
   scale_y_continuous(limits = c(-50, max(long_5min$pm10) * 1.05), expand = c(0, 0)) +
   scale_x_datetime(date_labels = "%Y-%b") +
   theme_bw() +
@@ -109,7 +112,9 @@ p1 <- ggplot(long_5min, aes(datetime, pm10)) +
 
 p2 <- ggplot(long_5min, aes(datetime, pm2p5)) +
   geom_point(size = 0.7, color = "orange") +
-  labs(x = "", y = expression(PM2.5~(mu*g/m^{3})), title = "PM2.5 Raw (5 minute)") +
+  labs(x = "", y = expression(PM2.5 ~ (mu * g / m^{
+    3
+  })), title = "PM2.5 Raw (5 minute)") +
   scale_y_continuous(limits = c(-50, max(long_5min$pm2p5) * 1.05), expand = c(0, 0)) +
   scale_x_datetime(date_labels = "%Y-%b") +
   theme_bw()
@@ -119,7 +124,9 @@ p_long_5min <- p1 / p2
 p_long_daily_raw <- ggplot(long_daily) +
   geom_step(mapping = aes(date, pm10_daily, color = "PM10"), size = 0.5) +
   geom_step(mapping = aes(date, pm2p5_daily, color = "PM2.5"), size = 0.5) +
-  labs(x = "", y = expression(PM~(mu*g/m^{3})), title = "PM Daily Raw") +
+  labs(x = "", y = expression(PM ~ (mu * g / m^{
+    3
+  })), title = "PM Daily Raw") +
   scale_color_manual(name = "Legend", values = c("PM10" = "red", "PM2.5" = "orange")) +
   scale_x_date(date_labels = "%Y-%b") +
   scale_y_continuous(limits = c(0, 60), expand = c(0, 1)) +

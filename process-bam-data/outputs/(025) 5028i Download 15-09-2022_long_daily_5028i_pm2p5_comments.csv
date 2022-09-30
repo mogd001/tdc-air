@@ -1,3 +1,0 @@
-date,dur,pm,pm_out,err_type,duration,duration_hours,comment
-2022-08-10,4,24.968,25.78409893992933,1,20,0.33,Daily value recalculated from valid 5 minute readings due to 20 minutes missing data caused by instrument check.  23 hours of data is required to calculate a valid daily value.  The recalculation changed the daily value from 24.968 to 25.784.
-2022-08-31,53,NA,NA,2,265,4.42,Missing record on 31/08/2022 for 1 day due to 4.42 hours of missing data while Watercare completed instrument audit.
