@@ -7,7 +7,7 @@ source("functions.R")
 site <- "AQ Richmond Central at Plunket"
 measurements <- get_measurements(site = site)
 
-reporting_interval <- interval(start = ymd("20210901"), end = ymd("20220831"))
+reporting_interval <- interval(start = ymd("20210901"), end = ymd("20220831")) # 2022 Reporting
 
 site_levels <- list("AQ Richmond Central at Plunket", "AQ Motueka at Goodman Park", "AQ Brightwater at Brightwater North")
 
@@ -127,3 +127,7 @@ rm(aqr_pm2p5_day, aqr_pm10_day, aqr_pm2p5_annual, aqr_pm10_annual, aqm_day, aqb_
 
 aq_day
 aq_annual
+
+# Add node and normalisation (Emily Wilton's, Environet study)
+aq_day$node <- mapply(calculate_pollution_node, aq_day$wind_kph_24h_avg, aq_day$temp_degc_4h_avg)
+aq_day$normalised_pm <- mapply(normalise_pm10, aq_day$measurement, aq_day$value, aq_day$node)

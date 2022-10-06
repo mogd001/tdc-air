@@ -1,25 +1,37 @@
 library(knitr)
 library(tidyverse)
 library(lubridate)
+library(pROC)
+library(precrec)
 
 #source("01_load_aq_data.R")
 #saveRDS(aq_day, file = "temp.RDS") 
 
-aq_day <- readRDS("temp.RDS")
+# September -> August Reporting Yearaq_day <- readRDS("temp.RDS")
+
 
 site <- "AQ Richmond Central at Plunket"
 aq_day_richmond_pm10 <- filter(aq_day, site == !!site & measurement == "PM10") %>% 
-  mutate(year = as.factor(year(date)))
+  mutate(year = year(date),
+         month = as.numeric(month(date)),
+         reporting_year = if_else(month > 8, year + 1, year))
 
-aq_day_richmond_pm10
+# site <- "AQ Motueka at Goodman Park"
+# aq_day_motueka_pm2p5 <- filter(aq_day, site == !!site & measurement == "PM2.5") %>% 
+#   mutate(year = year(date),
+#          month = as.numeric(month(date)),
+#          reporting_year = if_else(month > 8, year + 1, year))
+
 View(aq_day_richmond_pm10)
 
 # summary stats
-summary_stats <- group_by(aq_day_richmond_pm10, year) %>%
+summary_stats <- group_by(aq_day_richmond_pm10, reporting_year) %>%
   summarise(
     count = n(),
     count_non_na = sum(!is.na(value), na.rm = TRUE),
     count_exceedance = sum(value > 50, na.rm = TRUE),
+    min = min(value, na.rm = TRUE),
+    max = max(value, na.rm = TRUE),
     mean = mean(value, na.rm = TRUE),
     sd = sd(value, na.rm = TRUE),
     median = median(value, na.rm = TRUE),
@@ -29,7 +41,7 @@ summary_stats <- group_by(aq_day_richmond_pm10, year) %>%
 kable(summary_stats)
 
 # Kruskal-Wallis
-kruskal.test(value ~ year, data = aq_day_richmond_pm10)
+kruskal.test(value ~ reporting_year, data = aq_day_richmond_pm10)
 # Interpretation: as the p-value is less than the significance level 0.05, we can conclude that there are significant differences between the treatment groups.
 pwt <- pairwise.wilcox.test(aq_day_richmond_pm10$value, aq_day_richmond_pm10$year,
                      p.adjust.method = "BH")
@@ -38,9 +50,9 @@ ifelse(pwt$p.value < 0.05, 1, 0) # Interpretation: the pairwise comparison shows
 #### Supervised Classification
 all_data <- aq_day_richmond_pm10 %>% 
   mutate(pm10 = value) %>% 
-  mutate_at(vars(wind_mps_nhrs_less1, wind_mps_nhrs_less2, wind_mps_nhrs_less3, temp_degc_nhrs_less1, temp_degc_nhrs_less5, temp_degc_nhrs_less10), ~replace_na(., 0)) %>% 
+  mutate_at(vars(wind_kph_nhrs_less1, wind_kph_nhrs_less2, wind_kph_nhrs_less3, temp_degc_nhrs_less1, temp_degc_nhrs_less5, temp_degc_nhrs_less10), ~replace_na(., 0)) %>% 
   drop_na() %>% 
-  #select(pm10, wind_mps_24h_avg, temp_degc_4h_avg) %>%  # reducing variables initially for first model development
+  #select(pm10, wind_kph_24h_avg, temp_degc_4h_avg) %>%  # reducing variables initially for first model development
   mutate(pm10 = if_else(pm10 <= 50, "pm10_below_50", "pm10_above_50")) %>% # covert to binary outcome for supervised classification
   mutate(pm10 = factor(pm10, levels = c("pm10_below_50", "pm10_above_50")))
 
@@ -52,16 +64,16 @@ ggplot(all_data, aes(wind_mps_24h_avg, temp_degc_4h_avg, value)) +
 
 all_data %>% 
   filter(pm10 == "pm10_above_50") %>% 
-  group_by(year) %>% 
+  group_by(reporting_year) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
-  ggplot(aes(year, n)) +
+  ggplot(aes(reporting_year, n)) +
   geom_point() +
-  theme_bw() +
+  theme_bw() 
   
 model_data <- all_data %>% 
-  select(-c(date, site, measurement, reporting_period, year, value)) %>% 
-  select(pm10, temp_degc_4h_avg, wind_mps_24h_avg)
+  select(-c(date, site, measurement, reporting_period, reporting_year, value)) %>% 
+  select(pm10, temp_degc_4h_avg, wind_kph_24h_avg)
 
 # Split into training and test dataset
 train_size <- round(0.75 * nrow(model_data), 0)
@@ -85,26 +97,29 @@ rpart.plot(m_pruned, type = 3, box.palette = c("green", "red"), fallen.leaves = 
 test_data$predict <- predict(m_pruned, test_data, type = "class")
 mean(test_data$predict == test_data$pm10, na.rm = TRUE)  # this is a case of predicting rare events, need to revisit.
 
+# True positive accuracy
+positive <- test_data %>% filter(pm10 == "pm10_above_50")
+mean(positive$predict == positive$pm10, na.rm = TRUE)
+
 ##########################
-library(randomForest)
-
-mrf <- randomForest(pm10 ~ ., data = train_data,
-                  ntree = 500)
-
-test_data$predict <- predict(mrf, test_data, type = "class")
-mean(test_data$predict == test_data$pm10, na.rm = TRUE)
-
+# library(randomForest)
+# 
+# mrf <- randomForest(pm10 ~ ., data = train_data,
+#                   ntree = 500)
+# 
+# test_data$predict <- predict(mrf, test_data, type = "class")
+# mean(test_data$predict == test_data$pm10, na.rm = TRUE)
 ##########################
 
 all_data$predict <- predict(m_pruned, all_data, type = "class") 
 
 summary_stats_meteo <- all_data %>% 
-  select(year, predict) %>% 
-  group_by(year) %>%
+  select(reporting_year, predict) %>% 
+  group_by(reporting_year) %>%
   summarise(
-    low_exceedance = sum(predict == "pm10_below_50", na.rm = TRUE),
-    high_exceedance = sum(predict == "pm10_above_50", na.rm = TRUE)
+    low_exceedance_days = sum(predict == "pm10_below_50", na.rm = TRUE),
+    high_exceedance_days = sum(predict == "pm10_above_50", na.rm = TRUE)
   )
 
-summary_out <- summary_stats %>% left_join(summary_stats_meteo, by = "year")
+summary_out <- summary_stats %>% left_join(summary_stats_meteo, by = "reporting_year")
 # bar chart showing proportions

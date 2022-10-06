@@ -18,7 +18,9 @@ get_rainfall_data <- function(site,
                               from = from, 
                               to = to) {
   # Get rainfall data from Hilltop Server.
-  get_data_site_measurement(site = site, measurement = "Rainfall", method = "Total", from = from, to = to, interval = "1 day") %>% 
+  get_data_site_measurement(site = site, measurement = "Rainfall", 
+                            method = "Total", from = from, to = to, 
+                            interval = "1 day") %>% 
     rename(rainfall = value) %>%
     arrange(datetime) %>%
     mutate(
@@ -72,28 +74,29 @@ get_meteorological_data <- function(site,
   meteo_data <- tibble(date = seq(ymd(from), ymd(to), by = "1 day"))
   
   ##### Wind Speed
-  wind_mps <- get_data_site_measurement(site = site, measurement = "Wind Speed (hourly)", 
-                                        method = "Average", from = from, to = to, interval = "1 hour") %>% 
+  wind_kph <- get_data_site_measurement(site = site, measurement = "Wind Speed (hourly)", 
+                                        method = "Average", from = from, to = to, 
+                                        interval = "1 hours") %>% 
     arrange(datetime) %>%
     mutate(
-      value = round(value/3.6, digits = 2), # convert to mps.
+      value = round(value, digits = 2), # round(value/3.6, digits = 2), # convert to mps.
       hour = hour(datetime)
     ) %>%
     select(datetime, date, hour, value) 
 
   meteo_data <- meteo_data %>% 
-    left_join(determine_meteo_variable(wind_mps) %>% rename(wind_mps_24h_avg = value), by = "date") %>%  # 24-hour average (midnight to midnight)
-    left_join(determine_meteo_variable(wind_mps, hr_start = 17) %>% rename(wind_mps_7h_avg = value), by = "date") %>%  # 7-hour average (5 pm to midnight)
-    left_join(determine_meteo_variable(wind_mps, hr_start = 20) %>% rename(wind_mps_4h_avg = value), by = "date") %>%   # 4-hour average (8 pm to midnight)
-    left_join(determine_meteo_variable(wind_mps, hr_start = 6, hr_end = 12) %>% rename(wind_mps_6h_avg_am = value), by = "date") %>%  # 6-hour average (6 am to midday)
-    left_join(determine_meteo_variable(wind_mps, hr_start = 18, offset_day = -1) %>% rename(wind_mps_6h_avg_pm_preceeding = value), by = "date") %>%  # 6-hour average preceding day (6 pm to midnight)
-    left_join(determine_meteo_variable(wind_mps, FUN = min) %>% rename(wind_mps_min = value), by = "date") %>%  # Minimum 1-hour (Midnight to midnight)
-    left_join(determine_meteo_variable(wind_mps, FUN = max) %>% rename(wind_mps_max = value), by = "date") %>%  # Maximum 1-hour (Midnight to midnight)
-    left_join(determine_meteo_variable(wind_mps, hr_start = 16, hr_end = 17) %>% rename(wind_mps_1h_avg_16 = value), by = "date") %>%  # Hourly average (Hour ending 5 pm, start 1600)
-    left_join(determine_meteo_variable(wind_mps, hr_start = 19, hr_end = 20) %>% rename(wind_mps_1h_avg_19 = value), by = "date") %>%  # Hourly average (Hour ending 8 pm, start 1900)
-    left_join(determine_meteo_variable(wind_mps, hr_start = 17, FUN = sum, filter_value = 1) %>% rename(wind_mps_nhrs_less1 = value), by = "date") %>%  # No. hours (5 pm to midnight), < 1 ms-1
-    left_join(determine_meteo_variable(wind_mps, hr_start = 17, FUN = sum, filter_value = 2) %>% rename(wind_mps_nhrs_less2 = value), by = "date") %>%  # No. hours (5 pm to midnight), < 2 ms-1
-    left_join( determine_meteo_variable(wind_mps, hr_start = 17, FUN = sum, filter_value = 3) %>% rename(wind_mps_nhrs_less3 = value), by = "date") # No. hours (5 pm to midnight), < 3 ms-1
+    left_join(determine_meteo_variable(wind_kph) %>% rename(wind_kph_24h_avg = value), by = "date") %>%  # 24-hour average (midnight to midnight)
+    left_join(determine_meteo_variable(wind_kph, hr_start = 17) %>% rename(wind_kph_7h_avg = value), by = "date") %>%  # 7-hour average (5 pm to midnight)
+    left_join(determine_meteo_variable(wind_kph, hr_start = 20) %>% rename(wind_kph_4h_avg = value), by = "date") %>%   # 4-hour average (8 pm to midnight)
+    left_join(determine_meteo_variable(wind_kph, hr_start = 6, hr_end = 12) %>% rename(wind_kph_6h_avg_am = value), by = "date") %>%  # 6-hour average (6 am to midday)
+    left_join(determine_meteo_variable(wind_kph, hr_start = 18, offset_day = -1) %>% rename(wind_kph_6h_avg_pm_preceeding = value), by = "date") %>%  # 6-hour average preceding day (6 pm to midnight)
+    left_join(determine_meteo_variable(wind_kph, FUN = min) %>% rename(wind_kph_min = value), by = "date") %>%  # Minimum 1-hour (Midnight to midnight)
+    left_join(determine_meteo_variable(wind_kph, FUN = max) %>% rename(wind_kph_max = value), by = "date") %>%  # Maximum 1-hour (Midnight to midnight)
+    left_join(determine_meteo_variable(wind_kph, hr_start = 16, hr_end = 17) %>% rename(wind_kph_1h_avg_16 = value), by = "date") %>%  # Hourly average (Hour ending 5 pm, start 1600)
+    left_join(determine_meteo_variable(wind_kph, hr_start = 19, hr_end = 20) %>% rename(wind_kph_1h_avg_19 = value), by = "date") %>%  # Hourly average (Hour ending 8 pm, start 1900)
+    left_join(determine_meteo_variable(wind_kph, hr_start = 17, FUN = sum, filter_value = 1) %>% rename(wind_kph_nhrs_less1 = value), by = "date") %>%  # No. hours (5 pm to midnight), < 1 ms-1
+    left_join(determine_meteo_variable(wind_kph, hr_start = 17, FUN = sum, filter_value = 2) %>% rename(wind_kph_nhrs_less2 = value), by = "date") %>%  # No. hours (5 pm to midnight), < 2 ms-1
+    left_join( determine_meteo_variable(wind_kph, hr_start = 17, FUN = sum, filter_value = 3) %>% rename(wind_kph_nhrs_less3 = value), by = "date") # No. hours (5 pm to midnight), < 3 ms-1
   
   #### Wind Direction
   wind_dir <- get_data_site_measurement(site = site, measurement = "Wind Direction (hourly)", 
@@ -132,4 +135,63 @@ get_meteorological_data <- function(site,
     mutate(temp_degc_max_less_min_following = temp_degc_max - temp_degc_1h_min_following) # Max sample day less min day following 1-hour (Midnight to midnight)
   
   meteo_data
+}
+
+
+calculate_pollution_node <- function(wind_kph_24h_avg, temp_degc_4h_avg) {
+  # Apply Boosted Regression Tree outputs from Emily Wilton's, Environet study.
+  # "Assessing long-term trends in PM10 emissions and concentrations in Richmond"
+
+  node <- NA
+  if (is.na(wind_kph_24h_avg) | is.na(temp_degc_4h_avg)) {
+    return(node)
+  }
+  
+  if (wind_kph_24h_avg < 5.03958 & temp_degc_4h_avg > 6.81) {
+    node <- 3
+  } else if (wind_kph_24h_avg < 3.81 & temp_degc_4h_avg < 6.81) {
+    node <- 1 
+  } else if (wind_kph_24h_avg >= 3.81 & wind_kph_24h_avg < 5.03958 & temp_degc_4h_avg < 6.81) {
+    node <- 2
+  } else if (wind_kph_24h_avg >= 7.26875 & wind_kph_24h_avg < 13.2104) {
+    node <- 6
+  } else if (wind_kph_24h_avg >= 13.2104) {
+    node <- 7
+  } else if (wind_kph_24h_avg >= 5.03958 & wind_kph_24h_avg < 7.26875 & temp_degc_4h_avg < 5.7775) {
+    node <- 4
+  } else if (wind_kph_24h_avg >= 5.03958 & wind_kph_24h_avg < 7.26875 & temp_degc_4h_avg >= 5.7775) {
+    node <- 5
+  }
+  # Return node as determined by the above logic. 
+  node
+}
+
+
+normalise_pm10 <- function(measurement, pm10, node){
+  # Apply normalising function.
+  
+  if (is.na(pm10) | is.na(node)) {
+    return(NA)
+  }
+  
+  if (measurement == "PM10") { # normalisation only valid for PM10 at this stage.
+    if (node == 1) {
+      normalised_pm10 <- pm10 - 50.3  
+    } else if (node == 2) {
+      normalised_pm10 <- pm10 - 29.61      
+    } else if (node == 3) {
+      normalised_pm10 <- pm10 -  11.37   
+    } else if (node == 4) {
+      normalised_pm10 <- pm10 - 13.79     
+    } else if (node == 5) {
+      normalised_pm10 <- pm10 - 0    
+    } else {
+      normalised_pm10 <- NA
+    } 
+  } else {
+    return(NA)
+  }
+  
+  # Return normalised_pm10
+  normalised_pm10
 }
