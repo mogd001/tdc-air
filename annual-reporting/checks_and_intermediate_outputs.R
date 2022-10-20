@@ -8,19 +8,20 @@ aq_day <- readRDS("temp.RDS")
 # Checks
 check_interval <- interval(start = ymd("20200901"), end = ymd("20210831"))
 site <- "AQ Richmond Central at Plunket"
-normalising_check <- filter(aq_day, site == !!site & measurement == "PM10") %>% 
-  mutate(year = year(date),
-         month = as.numeric(month(date)),
-         reporting_year = if_else(month > 8, year + 1, year)) %>% 
+normalising_check <- filter(aq_day, site == !!site & measurement == "PM10") %>%
+  mutate(
+    year = year(date),
+    month = as.numeric(month(date)),
+    reporting_year = if_else(month > 8, year + 1, year)
+  ) %>%
   filter(date %within% check_interval)
 
-normalising_check_out <- normalising_check %>% 
-  rename(pm10 = value) %>% 
-  select(date, pm10, wind_kph_24h_avg, temp_degc_4h_avg, node, normalised_pm) %>% 
+normalising_check_out <- normalising_check %>%
+  rename(pm10 = value) %>%
+  select(date, pm10, wind_kph_24h_avg, temp_degc_4h_avg, node, normalised_pm) %>%
   mutate(
-    exceedance_nodes1to3 = if_else(pm10 > 50 & node < 4, pm10, -999), 
+    exceedance_nodes1to3 = if_else(pm10 > 50 & node < 4, pm10, -999),
     exceedance_nodes1to5 = if_else(pm10 > 50 & node < 6, pm10, -999)
-    
   )
 
 clipr::write_clip(normalising_check_out) # copy to clipboard
@@ -30,18 +31,20 @@ clipr::write_clip(normalising_check_out) # copy to clipboard
 reporting_interval2 <- interval(start = ymd("20210101"), end = ymd("20221006"))
 
 site <- "AQ Richmond Central at Plunket"
-aq_day_richmond_pm10_out <- filter(aq_day, site == !!site & measurement == "PM10") %>% 
-  mutate(year = year(date),
-         month = as.numeric(month(date)),
-         reporting_year = if_else(month > 8, year + 1, year)) %>% 
-  filter(date %within% reporting_interval2) %>% 
-  rename(pm10 = value) %>% 
+aq_day_richmond_pm10_out <- filter(aq_day, site == !!site & measurement == "PM10") %>%
+  mutate(
+    year = year(date),
+    month = as.numeric(month(date)),
+    reporting_year = if_else(month > 8, year + 1, year)
+  ) %>%
+  filter(date %within% reporting_interval2) %>%
+  rename(pm10 = value) %>%
   select(date, reporting_year, month, pm10, wind_kph_24h_avg, temp_degc_24h_avg, temp_degc_4h_avg, node, normalised_pm)
 
 clipr::write_clip(aq_day_richmond_pm10_out)
 
 aq_day_richmond_pm10_stats <- group_by(aq_day_richmond_pm10_out, reporting_year, month) %>%
-#aq_day_richmond_pm10_stats <- group_by(aq_day_richmond_pm10_out, reporting_year) %>%
+  # aq_day_richmond_pm10_stats <- group_by(aq_day_richmond_pm10_out, reporting_year) %>%
   summarise(
     count = n(),
     count_non_na = sum(!is.na(pm10), na.rm = TRUE),
@@ -55,20 +58,22 @@ aq_day_richmond_pm10_stats <- group_by(aq_day_richmond_pm10_out, reporting_year,
   )
 clipr::write_clip(aq_day_richmond_pm10_stats)
 
-aq_day_richmond_pm10_out %>% 
-  group_by(reporting_year, month) %>% 
+aq_day_richmond_pm10_out %>%
+  group_by(reporting_year, month) %>%
   summarise(mean = mean(temp_degc_24h_avg, na.rm = TRUE))
 
-aq_day_richmond_pm10_out %>% 
-  group_by(reporting_year, month) %>% 
+aq_day_richmond_pm10_out %>%
+  group_by(reporting_year, month) %>%
   summarise(mean = mean(wind_kph_24h_avg, na.rm = TRUE))
 
-aq_day_richmond_pm2p5_out <- filter(aq_day, site == !!site & measurement == "PM2.5") %>% 
-  mutate(year = year(date),
-         month = as.numeric(month(date)),
-         reporting_year = if_else(month > 8, year + 1, year)) %>% 
-  filter(date %within% reporting_interval2) %>% 
-  rename(pm2.5 = value) %>% 
+aq_day_richmond_pm2p5_out <- filter(aq_day, site == !!site & measurement == "PM2.5") %>%
+  mutate(
+    year = year(date),
+    month = as.numeric(month(date)),
+    reporting_year = if_else(month > 8, year + 1, year)
+  ) %>%
+  filter(date %within% reporting_interval2) %>%
+  rename(pm2.5 = value) %>%
   select(date, year, month, pm2.5, wind_kph_24h_avg, temp_degc_24h_avg, temp_degc_4h_avg, node, normalised_pm)
 
 clipr::write_clip(aq_day_richmond_pm2p5_out) # copy to clipboard
@@ -88,13 +93,13 @@ aq_day_richmond_pm2p5_stats <- group_by(aq_day_richmond_pm2p5_out, year, month) 
   )
 clipr::write_clip(aq_day_richmond_pm2p5_stats)
 
-# aq_day_richmond_pm10_out %>% 
-#   group_by(year) %>% 
-#   summarise(mean = median(temp_degc_24h_avg, na.rm = TRUE)) %>% 
+# aq_day_richmond_pm10_out %>%
+#   group_by(year) %>%
+#   summarise(mean = median(temp_degc_24h_avg, na.rm = TRUE)) %>%
 #   ggplot(aes(year, mean)) +
 #   geom_line() +
 #   geom_smooth(color = "red") +
-#   theme_bw() + 
+#   theme_bw() +
 #   labs(x = "year", y = "Richmond average daily temperature (deg C)")
 
 
@@ -107,22 +112,24 @@ clipr::write_clip(aq_day_richmond_pm2p5_stats)
 reporting_interval2 <- interval(start = ymd("20220501"), end = ymd("20220930"))
 
 site <- "AQ Motueka at Goodman Park"
-aq_day_motueka_pm2p5_out <- filter(aq_day, site == !!site & measurement == "PM2.5") %>% 
-  mutate(year = year(date),
-         month = as.numeric(month(date)),
-         reporting_year = if_else(month > 8, year + 1, year)) %>% 
-  filter(date %within% reporting_interval2) %>% 
-  rename(pm2.5 = value) %>% 
+aq_day_motueka_pm2p5_out <- filter(aq_day, site == !!site & measurement == "PM2.5") %>%
+  mutate(
+    year = year(date),
+    month = as.numeric(month(date)),
+    reporting_year = if_else(month > 8, year + 1, year)
+  ) %>%
+  filter(date %within% reporting_interval2) %>%
+  rename(pm2.5 = value) %>%
   select(date, year, month, pm2.5, wind_kph_24h_avg, temp_degc_24h_avg, temp_degc_4h_avg, node)
 
 clipr::write_clip(aq_day_motueka_pm2p5_out) # copy to clipboard
 
-aq_day_motueka_pm2p5_out %>% 
-  group_by(year, month) %>% 
+aq_day_motueka_pm2p5_out %>%
+  group_by(year, month) %>%
   summarise(mean = mean(temp_degc_24h_avg, na.rm = TRUE))
 
-aq_day_motueka_pm2p5_out %>% 
-  group_by(year, month) %>% 
+aq_day_motueka_pm2p5_out %>%
+  group_by(year, month) %>%
   summarise(mean = mean(wind_kph_24h_avg, na.rm = TRUE))
 
 group_by(aq_day_motueka_pm2p5_out, year) %>%
