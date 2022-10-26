@@ -79,7 +79,7 @@ output1c <- TheilSen(
   selectByDate(trend_data, year = 2016:2022),
   pollutant = "pm10",
   xlab = "Year",
-  ylab = expression(Richmond ~ Central ~ Richmond ~ PM[10] ~ (mu * g / m^{
+  ylab = expression(Richmond ~ Central ~ PM[10] ~ (mu * g / m^{
     3
   })),
   deseason = TRUE,
