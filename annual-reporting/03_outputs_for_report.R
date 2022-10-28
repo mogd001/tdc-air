@@ -285,6 +285,7 @@ df_pm2p5 <- aq_day_richmond_pm2p5_reporting_period %>%
     sd = sd(value, na.rm = TRUE),
     iqr = IQR(value, na.rm = TRUE)
   )
+clipr::write_clip(df_pm2p5)
 
 # Winter summary
 df2_pm2p5 <- aq_day_richmond_pm2p5_reporting_period %>%
@@ -502,7 +503,8 @@ ggsave("outputs/aq_day_comparison_pm2p5.jpeg", plot = p_aq_day_comparison_pm2p5,
 ###### Brightwater daily PM2.5 concentrations
 site <- "AQ Brightwater at Brightwater North"
 aq_day_brightwater_pm2p5_reporting_period <- filter(aq_day_reporting_period, site == !!site & measurement == "PM2.5")
-labels_daily_brightwater_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5")
+labels_daily_brightwater_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5") %>% 
+  mutate(x = ymd("2022-05-01"))
 
 p_aq_day_brightwater_pm2p5 <- ggplot() +
   annotate("rect", xmin = ymd(20220501), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
@@ -520,10 +522,6 @@ p_aq_day_brightwater_pm2p5 <- ggplot() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")
 
 ggsave("outputs/aq_day_brightwater_pm2p5.jpeg", plot = p_aq_day_brightwater_pm2p5, width = 10, height = 7)
-
-
-
-
 
 # ###### Richmond monthly daily PM10 distribution
 # site <- "AQ Richmond Central at Plunket"
