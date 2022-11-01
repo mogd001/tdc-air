@@ -351,7 +351,8 @@ annual_mean
 ###### Motueka daily PM2.5 concentrations
 site <- "AQ Motueka at Goodman Park"
 aq_day_motueka_pm2p5_reporting_period <- filter(aq_day_reporting_period, site == !!site & measurement == "PM2.5")
-labels_daily_motueka_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5")
+labels_daily_motueka_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5")  %>% 
+  mutate(x = ymd("2022-01-01"))
 
 p_aq_day_motueka_pm2p5 <- ggplot() +
   annotate("rect", xmin = ymd(20220501), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
@@ -452,7 +453,7 @@ annual_mean
 sites_comparison <- c("AQ Richmond Central at Plunket", "AQ Motueka at Goodman Park")
 aq_daypm2p5_comparison_reporting_period <- filter(aq_day_reporting_period, site %in% sites_comparison & measurement == "PM2.5") %>% 
   mutate(winter = ifelse(month %in% c(5, 6, 7, 8), "May - August", "September - April"))
-labels_daily_comparison_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5")
+labels_daily_comparison_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5") 
 
 p_aq_day_comparison_pm2p5_ts <- ggplot() + 
   annotate("rect", xmin = ymd(20220501), xmax = ymd(20220831), ymin = 0, ymax = 50, alpha = 0.1, fill = "black") + # add winter rectangle
@@ -474,7 +475,7 @@ p_aq_day_comparison_pm2p5_ts <- ggplot() +
 
 
 p_aq_day_comparison_pm2p5_bp <- ggplot() + 
-  geom_violin(aq_daypm2p5_comparison_reporting_period, mapping = aes(site, value, fill = winter, color = winter), alpha = 0.4, size = 0.2) +
+  geom_boxplot(aq_daypm2p5_comparison_reporting_period, mapping = aes(site, value, fill = winter, color = winter), alpha = 0.4, size = 0.2, width=0.2, outlier.shape = NA, position=position_dodge(width = 0.5)) +
   geom_jitter(aq_daypm2p5_comparison_reporting_period, mapping = aes(site, value, color = winter), width = 0.05, size = 1, shape = 3, alpha = 0.5) +
 #  geom_text(data = labels_daily_comparison_pm2p5, mapping = aes("AQ Richmond Central at Plunket", y, label = label, vjust = -0.15), size = 3.5, color = "red", parse = TRUE) +
   geom_hline(yintercept = 15, color = "red", linetype = "dashed") +
@@ -504,11 +505,11 @@ ggsave("outputs/aq_day_comparison_pm2p5.jpeg", plot = p_aq_day_comparison_pm2p5,
 site <- "AQ Brightwater at Brightwater North"
 aq_day_brightwater_pm2p5_reporting_period <- filter(aq_day_reporting_period, site == !!site & measurement == "PM2.5")
 labels_daily_brightwater_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5") %>% 
-  mutate(x = ymd("2022-05-01"))
+  mutate(x = ymd("2022-08-01"))
 
 p_aq_day_brightwater_pm2p5 <- ggplot() +
-  annotate("rect", xmin = ymd(20220501), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
-  geom_label(data = labels_general, aes(x, y, label = label)) +
+  annotate("rect", xmin = ymd(20220620), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
+  geom_label(data = labels_general, aes(ymd(20220701), y, label = label)) +
   geom_col(data = aq_day_brightwater_pm2p5_reporting_period, aes(date, value, color = measurement), size = 0.2, color = "black") +
   labs(x = "", y = expression(PM[2.5] ~ (mu * g / m^{
     3
