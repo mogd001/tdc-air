@@ -360,7 +360,7 @@ p_aq_day_motueka_pm2p5 <- ggplot() +
   geom_col(data = aq_day_motueka_pm2p5_reporting_period, aes(date, value, color = measurement), size = 0.2, color = "black") +
   labs(x = "", y = expression(PM[2.5] ~ (mu * g / m^{
     3
-  })), title = "Daily Records Motueka at Goodman Park") +
+  })), title = "Daily Records Motueka at Ledger Goodman Park") +
   geom_hline(yintercept = 15, color = "red", linetype = "dashed") +
   geom_text(data = labels_daily_motueka_pm2p5, mapping = aes(x, y, label = label, vjust = -0.15, hjust = -0.02), size = 3.5, color = "red", parse = TRUE) +
   scale_color_manual(name = "Legend", values = c("PM10" = "black"), labels = c(PM10 = expression(paste(~ PM[2.5])))) +
@@ -452,7 +452,12 @@ annual_mean
 ###### Motueka daily PM2.5 vs Richmond daily PM2.5
 sites_comparison <- c("AQ Richmond Central at Plunket", "AQ Motueka at Goodman Park")
 aq_daypm2p5_comparison_reporting_period <- filter(aq_day_reporting_period, site %in% sites_comparison & measurement == "PM2.5") %>% 
-  mutate(winter = ifelse(month %in% c(5, 6, 7, 8), "May - August", "September - April"))
+  mutate(winter = ifelse(month %in% c(5, 6, 7, 8), "May - August", "September - April"),
+         site = ifelse(site == "AQ Motueka at Goodman Park", "Motueka at Ledger Goodman Park", "Richmond Central at Plunket"))
+
+aq_daypm2p5_comparison_reporting_period$site <- factor(aq_daypm2p5_comparison_reporting_period$site, levels = c("Richmond Central at Plunket", "Motueka at Ledger Goodman Park"))
+
+
 labels_daily_comparison_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5") 
 
 p_aq_day_comparison_pm2p5_ts <- ggplot() + 
@@ -470,7 +475,7 @@ p_aq_day_comparison_pm2p5_ts <- ggplot() +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
         legend.title = element_blank(),
-        legend.position = c(0.13, 0.84),
+        legend.position = c(0.135, 0.84),
         legend.box.background = element_rect(colour = "black"))
 
 
@@ -507,17 +512,26 @@ aq_day_brightwater_pm2p5_reporting_period <- filter(aq_day_reporting_period, sit
 labels_daily_brightwater_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5") %>% 
   mutate(x = ymd("2022-08-01"))
 
+
+my_dates <- function(d) {
+  aq_day_brightwater_pm2p5_reporting_period %>% 
+    subset(!is.na(value)) %>% 
+    pull(date)
+}
+
 p_aq_day_brightwater_pm2p5 <- ggplot() +
   annotate("rect", xmin = ymd(20220620), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
   geom_label(data = labels_general, aes(ymd(20220701), y, label = label)) +
   geom_col(data = aq_day_brightwater_pm2p5_reporting_period, aes(date, value, color = measurement), size = 0.2, color = "black") +
   labs(x = "", y = expression(PM[2.5] ~ (mu * g / m^{
     3
-  })), title = "Daily Records Brightwater North") +
+  })), title = "Daily Records Brightwater North 2022") +
   geom_hline(yintercept = 15, color = "red", linetype = "dashed") +
   geom_text(data = labels_daily_brightwater_pm2p5, mapping = aes(x, y, label = label, vjust = -0.15, hjust = -0.02), size = 3.5, color = "red", parse = TRUE) +
   scale_color_manual(name = "Legend", values = c("PM10" = "black"), labels = c(PM10 = expression(paste(~ PM[2.5])))) +
-  scale_x_date(date_labels = "%Y-%b", date_breaks = "1 month", expand = c(0, 0)) +
+  
+  scale_x_date(date_labels = "%d-%b", date_breaks = my_dates, expand = c(0, 0)) +
+  
   scale_y_continuous(limits = c(0, 60), expand = c(0, 0)) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1), legend.position = "none")
