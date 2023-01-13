@@ -50,7 +50,7 @@ telem_data <- GetData(hts_file, site, measurement, start_date, end_date) %>%
     pm2p5 = value
   )
 
-telem_data$datetime <- force_tz(telem_data$datetime, tz = "Etc/GMT+12")
+telem_data$datetime <- force_tz(telem_data$datetime, tz = "Etc/GMT-12")
 
 disconnect(hts_file)
 
@@ -236,7 +236,7 @@ df_5min_cleaned <- long_5min_pm10_cleaned %>% rename(pm = pm10)
 gaps <- long_5min_pm10_gaps %>%
   rename(pm = pm10) %>%
   select(datetime, dur) %>%
-  mutate(date = as.Date(datetime, tz = "Etc/GMT+12")) %>%
+  mutate(date = as.Date(datetime, tz = "Etc/GMT-12")) %>%
   group_by(date) %>%
   summarise(date = date, dur = sum(dur)) %>%
   ungroup() %>%
@@ -274,7 +274,7 @@ df_5min_cleaned <- long_5min_pm2p5_cleaned %>% rename(pm = pm2p5)
 gaps <- long_5min_pm2p5_gaps %>%
   rename(pm = pm2p5) %>%
   select(datetime, dur) %>%
-  mutate(date = as.Date(datetime, tz = "Etc/GMT+12")) %>%
+  mutate(date = as.Date(datetime, tz = "Etc/GMT-12")) %>%
   group_by(date) %>%
   summarise(date = date, dur = sum(dur)) %>%
   ungroup() %>%

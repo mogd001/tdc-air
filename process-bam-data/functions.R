@@ -20,7 +20,7 @@ merge_dat_files <- function(files) {
     mutate(
       Date = mdy(Date),
       Time = hm(Time),
-      datetime = force_tz(Date + Time, tz = "Etc/GMT+12"),
+      datetime = force_tz(Date + Time, tz = "Etc/GMT-12"),
       time = format(datetime, format = "%H:%M:%S")
     ) %>%
     arrange(datetime) %>%
@@ -94,7 +94,7 @@ clean_long_daily_data <- function(df, df_5min_cleaned, gaps) {
   # NOTE: NEED TO CONSIDER IF DURATION OF GAP CROSSES MULTIPLE DAYS.
   re_calc_daily <- df_5min_cleaned %>%
     filter(pm != 0) %>%
-    mutate(date = as.Date(datetime, tz = "Etc/GMT+12")) %>%
+    mutate(date = as.Date(datetime, tz = "Etc/GMT-12")) %>%
     group_by(date) %>%
     summarise(pm_re_calc = mean(pm, na.rm = TRUE))
 
@@ -145,7 +145,7 @@ clean_long_daily_data <- function(df, df_5min_cleaned, gaps) {
       pm = round(pm, 3)
     )
 
-  df$datetime <- force_tz(df$datetime, tz = "Etc/GMT+12")
+  df$datetime <- force_tz(df$datetime, tz = "Etc/GMT-12")
 
   return(list(df, gaps))
 }

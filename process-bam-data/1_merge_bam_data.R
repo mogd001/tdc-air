@@ -65,7 +65,7 @@ long_daily <- long %>%
   select(-c(Time, Date)) %>%
   mutate(
     datetime = datetime - minutes(5), # offset datetime by 5 minutes
-    Date = as.Date(datetime, tz = "Etc/GMT+12"),
+    Date = as.Date(datetime, tz = "Etc/GMT-12"),
     Time = as_hms(datetime)
   ) %>%
   group_by(Date) %>%
