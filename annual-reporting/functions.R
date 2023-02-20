@@ -6,6 +6,7 @@ get_aq_data <- function(site,
                         measurement) {
   # Get air quality data from Hilltop Server.
   get_data_site_measurement(site = site, measurement = measurement, from = "Data start", to = "Data end") %>%
+    mutate(date = date(datetime)) %>% 
     group_by(date) %>%
     summarise(
       value = max(value),
@@ -26,6 +27,7 @@ get_rainfall_data <- function(site,
     rename(rainfall = value) %>%
     arrange(datetime) %>%
     mutate(
+      date = date(datetime),
       rainfall = round(rainfall, digits = 2)
     ) %>%
     mutate(date = as.Date(datetime)) %>%
@@ -50,6 +52,7 @@ determine_meteo_variable <- function(meteo,
 
   meteo <- meteo %>%
     filter(hour >= hr_start & hour < hr_end) %>%
+    mutate(date = date(datetime)) %>% 
     group_by(date) %>%
     mutate(n_hrs_day = n()) %>%
     ungroup() %>%
@@ -84,7 +87,8 @@ get_meteorological_data <- function(site,
     arrange(datetime) %>%
     mutate(
       value = round(value, digits = 2), # round(value/3.6, digits = 2), # convert to mps.
-      hour = hour(datetime)
+      hour = hour(datetime),
+      date = date(datetime)
     ) %>%
     select(datetime, date, hour, value)
 
@@ -109,7 +113,8 @@ get_meteorological_data <- function(site,
   ) %>%
     arrange(datetime) %>%
     mutate(
-      hour = hour(datetime)
+      hour = hour(datetime),
+      date = date(datetime)
     ) %>%
     select(datetime, date, hour, value)
 
@@ -124,7 +129,8 @@ get_meteorological_data <- function(site,
   ) %>%
     arrange(datetime) %>%
     mutate(
-      hour = hour(datetime)
+      hour = hour(datetime),
+      date = date(datetime)
     ) %>%
     select(datetime, date, hour, value)
 
