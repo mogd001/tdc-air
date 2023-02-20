@@ -508,7 +508,8 @@ ggsave("outputs/aq_day_comparison_pm2p5.jpeg", plot = p_aq_day_comparison_pm2p5,
 
 ###### Brightwater daily PM2.5 concentrations
 site <- "AQ Brightwater at Brightwater North"
-aq_day_brightwater_pm2p5_reporting_period <- filter(aq_day_reporting_period, site == !!site & measurement == "PM2.5")
+#aq_day_brightwater_pm2p5_reporting_period <- filter(aq_day_reporting_period, site == !!site & measurement == "PM2.5")
+aq_day_brightwater_pm2p5_reporting_period <- filter(aq_day, site == !!site & measurement == "PM2.5")
 labels_daily_brightwater_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5") %>% 
   mutate(x = ymd("2022-08-01"))
 
