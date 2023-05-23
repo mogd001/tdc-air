@@ -2,4 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+trend-analysis/outputs
+trend-analysis/LA
 annual-reporting/outputs
+annual-reporting/outputs/annual-report-2022
+export-aq-data/outputs
+process-bam-data/outputs
+windrose/outputs
+windrose/data
+new-aq-datasource
