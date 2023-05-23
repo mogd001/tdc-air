@@ -27,10 +27,9 @@ get_rainfall_data <- function(site,
     rename(rainfall = value) %>%
     arrange(datetime) %>%
     mutate(
-      date = date(datetime),
+      date = date(datetime) - days(1),
       rainfall = round(rainfall, digits = 2)
     ) %>%
-    mutate(date = as.Date(datetime)) %>%
     select(date, rainfall)
 }
 
@@ -81,8 +80,7 @@ get_meteorological_data <- function(site,
   ##### Wind Speed
   wind_kph <- get_data_site_measurement(
     site = site, measurement = "Wind Speed (hourly)",
-    method = "Average", from = from, to = to,
-    interval = "1 hours"
+    from = from, to = to
   ) %>%
     arrange(datetime) %>%
     mutate(
@@ -109,7 +107,7 @@ get_meteorological_data <- function(site,
   #### Wind Direction
   wind_dir <- get_data_site_measurement(
     site = site, measurement = "Wind Direction (hourly)",
-    method = "Average", from = from, to = to, interval = "1 hour"
+    from = from, to = to
   ) %>%
     arrange(datetime) %>%
     mutate(

@@ -8,7 +8,7 @@ source("functions.R")
 # measurements <- get_measurements(site = site)
 
 # Set reporting interval and site levels
-reporting_interval <- interval(start = ymd("20210901"), end = ymd("20220831")) # 2022 Reporting
+reporting_interval <- interval(start = ymd("20220101"), end = ymd("20221231")) # 2022 Reporting
 site_levels <- list("AQ Richmond Central at Plunket", "AQ Motueka at Goodman Park", "AQ Brightwater at Brightwater North")
 
 ###### IMPORT AND TIDY ######

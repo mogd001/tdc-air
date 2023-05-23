@@ -437,6 +437,7 @@ df4_mot_pm2p5 <- aq_day_motueka_pm2p5_reporting_period %>%
 
 summary_day_motueka_pm2p5_reporting_period <- as_tibble(cbind(nms = names(df_mot_pm2p5), round(t(df_mot_pm2p5), 1)))
 colnames(summary_day_motueka_pm2p5_reporting_period) <- c("nms", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug")
+#colnames(summary_day_motueka_pm2p5_reporting_period) <- c("nms", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 summary_day_motueka_pm2p5_reporting_period
 clipr::write_clip(summary_day_motueka_pm2p5_reporting_period)
