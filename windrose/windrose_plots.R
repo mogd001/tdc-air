@@ -12,7 +12,7 @@ library(tdcR)
 from <- "Data start" #from <- "Data start"
 to <- "Data end" #to <- "Data end"
 computed <- now()
-breaks <- c(-999, 5, 8, 11, 14, 17, 20, 999) # breaks between wind speeds
+breaks <- c(-999, 3, 5.6, 7, 8.7, 11.3, 14.3, 17.4, 20.6, 999) # breaks between wind speeds
 
 temp <- embed(breaks, 2)[, 2:1]
 labels <- c(paste0("ws ", temp[, 1], " - ", temp[, 2])) %>%
