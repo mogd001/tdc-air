@@ -73,9 +73,9 @@ generate_long_5min_comments <- function(gaps) {
       duration = dur * 5, # convert to minutes
       end_datetime = datetime + dur * minutes(5),
       comment = ifelse(err_type == 1, glue(base_string, reason = "value less than -20"),
-        ifelse(err_type == 2 & duration > minutes(30), glue(base_string, reason = "Watercare undertaking instrument audit"),
+        ifelse(err_type == 2 & duration > minutes(30), glue(base_string, reason = "instrument audit"),
           ifelse(err_type == 2, glue(base_string, reason = "value less than -50"),
-            ifelse(err_type == 3, glue(base_string, reason = "Watercare undertaking instrument audit (power off)"),
+            ifelse(err_type == 3, glue(base_string, reason = "instrument audit (power off)"),
               "Other error type, please inspect further."
             )
           )
@@ -158,8 +158,8 @@ generate_long_daily_comments <- function(gaps) {
       err_type = if_else(dur < 12, 1, 2) # 1 = Type A, 2 = Type B as per Processing Routine Logic
     )
 
-  err_type_1_base_string <- "Daily value recalculated from valid 5 minute readings due to {duration} minutes missing data caused by instrument check.  23 hours of data is required to calculate a valid daily value.  The recalculation changed the daily value from {round(pm, 3)} to {round(pm_out, 3)}."
-  err_type_2_base_string <- "Missing record on {format(date, '%d/%m/%Y')} for 1 day due to {duration_hours} hours of missing data while Watercare completed instrument audit."
+  err_type_1_base_string <- "Daily value recalculated from valid 5 minute readings due to {duration} minutes missing data.  23 hours of data is required to calculate a valid daily value.  The recalculation changed the daily value from {round(pm, 3)} to {round(pm_out, 3)}."
+  err_type_2_base_string <- "Missing record on {format(date, '%d/%m/%Y')} for 1 day due to {duration_hours} hours of missing data while instrument audit was completed."
 
   comments <- gaps %>%
     mutate(
