@@ -10,4 +10,4 @@ export-aq-data/outputs
 process-bam-data/outputs
 windrose/outputs
 windrose/data
-new-aq-datasource
+new-aq-datasource/outputs
