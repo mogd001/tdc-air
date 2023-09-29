@@ -13,7 +13,7 @@ source("functions.R")
 
 # source("01_load_aq_data.R")
 # saveRDS(aq_day, file = "temp.RDS")
-aq_day <- readRDS("aq_day.rds")
+aq_day <- readRDS("data/aq_day.rds")
 
 site <- "AQ Richmond Central at Plunket"
 
@@ -41,7 +41,6 @@ summary_stats <- group_by(aq_day_richmond_pm10, reporting_year) %>%
 clipr::write_clip(summary_stats)
 kable(summary_stats)
 
-
 # Openair-trend analysis
 trend_data <- aq_day_richmond_pm10 %>%
   select(date, pm10 = value) %>%
@@ -50,7 +49,7 @@ trend_data <- aq_day_richmond_pm10 %>%
 trend_data$date <- lubridate::ymd_hms(paste(trend_data$date, "00:00:00"))
 
 output1a <- TheilSen(
-  selectByDate(trend_data, year = 2006:2022),
+  selectByDate(trend_data, year = 2006:reporting_year),
   pollutant = "pm10",
   xlab = "Year",
   ylab = expression(Richmond ~ Central ~ PM[10] ~ (mu * g / m^{
@@ -60,10 +59,10 @@ output1a <- TheilSen(
   slope.percent = FALSE
 )
 
-ggsave("outputs/aq_richmond_pm10_trend_alldata.jpeg", plot = grid.arrange(output1b$plot), width = 10, height = 7)
+ggsave("outputs/aq_richmond_pm10_trend_alldata.jpeg", plot = grid.arrange(output1a$plot), width = 10, height = 7)
 
 output1b <- TheilSen(
-  selectByDate(trend_data, year = 2012:2022),
+  selectByDate(trend_data, year = (reporting_year-10):reporting_year),
   pollutant = "pm10",
   xlab = "Year",
   ylab = expression(Richmond ~ Central ~ PM[10] ~ (mu * g / m^{
@@ -76,7 +75,7 @@ output1b <- TheilSen(
 ggsave("outputs/aq_richmond_pm10_trend_last10years.jpeg", plot = grid.arrange(output1b$plot), width = 10, height = 7)
 
 output1c <- TheilSen(
-  selectByDate(trend_data, year = 2016:2022),
+  selectByDate(trend_data, year = (reporting_year-6):reporting_year),
   pollutant = "pm10",
   xlab = "Year",
   ylab = expression(Richmond ~ Central ~ PM[10] ~ (mu * g / m^{
@@ -88,6 +87,23 @@ output1c <- TheilSen(
 output1c$data[[1]]
 
 ggsave("outputs/aq_richmond_pm10_trend_last6years.jpeg", plot = grid.arrange(output1c$plot), width = 10, height = 7)
+
+# Modelling continues below
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Below is some modelling I undertook to estimate the PM10 values based on meteorological parameters.
 
 # Kruskal-Wallis
 kruskal.test(value ~ reporting_year, data = aq_day_richmond_pm10)
@@ -248,14 +264,14 @@ design <- "
 p_wt_pm10_byexceedance <- p_pm10_exceedance + winddensity_exceedance +
   tempdensity_exceedance + plot_layout(design = design, widths = c(5, 1), heights = c(5, 1)) +
   plot_annotation(
-    title = "Daily Records Richmond Central at Plunket Exceedances 2010-2022",
+    title = "Daily Records Richmond Central at Plunket Exceedances 2010-2023",
     caption = "Temperature: 4 hour average from 8 pm to 12 pm for exceedance day and 2 days prior, Wind Speed: 24 hour average"
   )
 
 p_wt_pm10_bynoexceedance <- p_pm10_no_exceedance + winddensity_no_exceedance +
   tempdensity_no_exceedance + plot_layout(design = design, widths = c(5, 1), heights = c(5, 1)) +
   plot_annotation(
-    title = "Daily Records Richmond Central at Plunket Non-Exceedances 2010-2022",
+    title = "Daily Records Richmond Central at Plunket Non-Exceedances 2010-2023",
     caption = "Temperature: 4 hour average from 8 pm to 12 pm for exceedance day and 2 days prior, Wind Speed: 24 hour average"
   )
 
@@ -296,7 +312,6 @@ mean(test_data$predict == test_data$pm10, na.rm = TRUE) # this is a case of pred
 # True positive accuracy
 positive <- test_data %>% filter(pm10 == "PM10 above 50")
 mean(positive$predict == positive$pm10, na.rm = TRUE)
-
 
 model_data$predict <- predict(m_pruned, model_data, type = "class")
 

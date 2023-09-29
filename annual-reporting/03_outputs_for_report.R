@@ -8,7 +8,7 @@ library(readxl)
 # saveRDS(aq_day, "aq_day.rds")
 # source("02_modelling.R")
 
-aq_day <- readRDS("aq_day.rds")
+aq_day <- readRDS("data/aq_day.rds")
 
 # Load exceedance data
 exceedances <- read_excel("data/pm10_exceedance_data.xlsx") %>%
@@ -48,7 +48,7 @@ labels <- tribble(
 
 labels_general <- tribble(
   ~x, ~y, ~label,
-  ymd(20220601), 55, "Winter 2022"
+  ymd(20230601), 55, "Winter 2023"
 )
 
 ###### All plots in one - not used in report
@@ -78,7 +78,7 @@ aq_day_richmond_pm10_reporting_period <- filter(aq_day_reporting_period, site ==
 labels_daily_richmond_pm10 <- labels %>% filter(code_type == "daily" & measurement == "PM10")
 
 p_aq_day_richmond_pm10 <- ggplot() +
-  annotate("rect", xmin = ymd(20220501), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
+  annotate("rect", xmin = ymd(20230501), xmax = ymd(20230831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
   geom_label(data = labels_general, aes(x, y, label = label)) +
   geom_col(data = aq_day_richmond_pm10_reporting_period, aes(date, value, color = measurement), size = 0.2, color = "black") +
   labs(x = "", y = expression(PM[10] ~ (mu * g / m^{
@@ -179,7 +179,7 @@ p_richmond_exceedance <- exceedances %>%
   geom_point(aes(x = year, y = second_highest_value), size = 2, shape = 1, color = "red", inherit.aes = FALSE) +
   geom_text(aes(x = year, y = second_highest_value, label = second_highest_value), size = 3, color = "red", inherit.aes = FALSE, vjust = -0.8) +
   labs(x = "", title = "Exceedances and Second Highest Daily Records Richmond Central at Plunket") +
-  scale_x_continuous(breaks = seq(2000, 2022, 1), expand = c(0, 0.2)) +
+  scale_x_continuous(breaks = seq(2000, 2023, 1), expand = c(0, 0.2)) +
   scale_y_continuous(
     name = "Number of exceedances",
     limits = c(0, 140),
@@ -218,7 +218,7 @@ p_richmond_normalised <- ggplot() +
   geom_text(data = exceedances2, aes(x = year, y = normalised_value / coeff, label = normalised_value), color = "red", size = 3, vjust = -1.0, inherit.aes = FALSE) +
   labs(x = "", shape = "", title = "Normalisation for Meteorological Conditions Richmond Central at Plunket") +
   scale_shape_manual(values = c(18, 15), labels = c("Normalised 75th Percentile", "Normalised Median")) +
-  scale_x_continuous(breaks = seq(2000, 2022, 1), expand = c(0, 0.4)) +
+  scale_x_continuous(breaks = seq(2000, 2023, 1), expand = c(0, 0.4)) +
   scale_y_continuous(
     name = "Number of high pollution potential days",
     limits = c(0, 16),
@@ -254,7 +254,7 @@ aq_day_richmond_pm2p5_reporting_period <- filter(aq_day_reporting_period, site =
 labels_daily_richmond_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5")
 
 p_aq_day_richmond_pm2p5 <- ggplot() +
-  annotate("rect", xmin = ymd(20220501), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
+  annotate("rect", xmin = ymd(20230501), xmax = ymd(20230831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
   geom_label(data = labels_general, aes(x, y, label = label)) +
   geom_col(data = aq_day_richmond_pm2p5_reporting_period, aes(date, value, color = measurement), size = 0.2, color = "black") +
   labs(x = "", y = expression(PM[2.5] ~ (mu * g / m^{
@@ -352,10 +352,10 @@ annual_mean
 site <- "AQ Motueka at Goodman Park"
 aq_day_motueka_pm2p5_reporting_period <- filter(aq_day_reporting_period, site == !!site & measurement == "PM2.5")
 labels_daily_motueka_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5")  %>% 
-  mutate(x = ymd("2022-01-01"))
+  mutate(x = ymd("2023-01-01"))
 
 p_aq_day_motueka_pm2p5 <- ggplot() +
-  annotate("rect", xmin = ymd(20220501), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
+  annotate("rect", xmin = ymd(20230501), xmax = ymd(20230831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
   geom_label(data = labels_general, aes(x, y, label = label)) +
   geom_col(data = aq_day_motueka_pm2p5_reporting_period, aes(date, value, color = measurement), size = 0.2, color = "black") +
   labs(x = "", y = expression(PM[2.5] ~ (mu * g / m^{
@@ -462,8 +462,8 @@ aq_daypm2p5_comparison_reporting_period$site <- factor(aq_daypm2p5_comparison_re
 labels_daily_comparison_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5") 
 
 p_aq_day_comparison_pm2p5_ts <- ggplot() + 
-  annotate("rect", xmin = ymd(20220501), xmax = ymd(20220831), ymin = 0, ymax = 50, alpha = 0.1, fill = "black") + # add winter rectangle
-  geom_label(data = labels_general, aes(ymd("20220601)"), 45, label = label)) +
+  annotate("rect", xmin = ymd(20230501), xmax = ymd(20230831), ymin = 0, ymax = 50, alpha = 0.1, fill = "black") + # add winter rectangle
+  geom_label(data = labels_general, aes(ymd("20230601)"), 45, label = label)) +
   geom_step(aq_daypm2p5_comparison_reporting_period, mapping = aes(date, value, color = site), alpha = 0.5) +
   geom_text(data = labels_daily_comparison_pm2p5, mapping = aes(x, y, label = label, vjust = -0.15, hjust = -0.02), size = 3.5, color = "red", parse = TRUE) +
   geom_hline(yintercept = 15, color = "red", linetype = "dashed") +
@@ -512,7 +512,7 @@ site <- "AQ Brightwater at Brightwater North"
 #aq_day_brightwater_pm2p5_reporting_period <- filter(aq_day_reporting_period, site == !!site & measurement == "PM2.5")
 aq_day_brightwater_pm2p5_reporting_period <- filter(aq_day, site == !!site & measurement == "PM2.5")
 labels_daily_brightwater_pm2p5 <- labels %>% filter(code_type == "daily" & measurement == "PM2.5") %>% 
-  mutate(x = ymd("2022-08-01"))
+  mutate(x = ymd("2023-08-01"))
 
 
 my_dates <- function(d) {
@@ -522,12 +522,12 @@ my_dates <- function(d) {
 }
 
 p_aq_day_brightwater_pm2p5 <- ggplot() +
-  annotate("rect", xmin = ymd(20220620), xmax = ymd(20220831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
-  geom_label(data = labels_general, aes(ymd(20220701), y, label = label)) +
+  annotate("rect", xmin = ymd(20230620), xmax = ymd(20230831), ymin = 0, ymax = 60, alpha = 0.1, fill = "black") + # add winter rectangle
+  geom_label(data = labels_general, aes(ymd(20230701), y, label = label)) +
   geom_col(data = aq_day_brightwater_pm2p5_reporting_period, aes(date, value, color = measurement), size = 0.2, color = "black") +
   labs(x = "", y = expression(PM[2.5] ~ (mu * g / m^{
     3
-  })), title = "Daily Records Brightwater North 2022") +
+  })), title = "Daily Records Brightwater North 2023") +
   geom_hline(yintercept = 15, color = "red", linetype = "dashed") +
   geom_text(data = labels_daily_brightwater_pm2p5, mapping = aes(x, y, label = label, vjust = -0.15, hjust = -0.02), size = 3.5, color = "red", parse = TRUE) +
   scale_color_manual(name = "Legend", values = c("PM10" = "black"), labels = c(PM10 = expression(paste(~ PM[2.5])))) +

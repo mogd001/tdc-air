@@ -1,5 +1,5 @@
 library(tidyverse)
-aq_day <- readRDS("aq_day.rds")
+aq_day <- readRDS("data/aq_day.rds")
 
 summary <- aq_day %>%  
   filter(reporting_period == 1) %>%

@@ -8,18 +8,19 @@ source("functions.R")
 # measurements <- get_measurements(site = site)
 
 # Set reporting interval and site levels
-reporting_interval <- interval(start = ymd("20220101"), end = ymd("20221231")) # 2022 Reporting
-site_levels <- list("AQ Richmond Central at Plunket", "AQ Motueka at Goodman Park", "AQ Brightwater at Brightwater North")
+#reporting_interval <- interval(start = ymd("20220101"), end = ymd("20221231")) # 2022 Reporting
+reporting_year <- 2023
+reporting_interval <- interval(start = ymd("20220901"), end = ymd("20230831")) # 2023 Reporting
+site_levels <- list("AQ Richmond Central at Plunket", "AQ Motueka at Goodman Park") # excluded "AQ Brightwater at Brightwater North"
 
 ###### IMPORT AND TIDY ######
 # - air quality data (PM2.5 and PM10)
 # - meteorological data (wind, temperature, rainfall)
-
 site_meteorology_mapping <- tribble(
   ~aq_site, ~rainfall_site, ~wind_temp_site,
   "AQ Richmond Central at Plunket", "HY Richmond Weather at TDC Roof", "HY Richmond Weather at TDC Roof",
-  "AQ Motueka at Goodman Park", "GW 2166 - Tui Close", "HY Motueka at Sportspark",
-  "AQ Brightwater at Brightwater North", "HY Wairoa at Haycock Rd", "HY Richmond Weather at TDC Roof"
+  "AQ Motueka at Goodman Park", "GW 2166 - Tui Close", "HY Motueka at Sportspark" #,
+  #"AQ Brightwater at Brightwater North", "HY Wairoa at Haycock Rd", "HY Richmond Weather at TDC Roof"
 )
 
 ###### AQ Richmond Central at Plunket [aqr] ######
@@ -94,38 +95,38 @@ aqm_day <- base_dates %>%
   mutate_at(vars(measurement), ~ replace_na(., "PM2.5"))
 
 ###### AQ Brightwater at Brightwater North [aqb] ######
-site <- "AQ Brightwater at Brightwater North"
-
-aqb_day <- get_aq_data(site = site, measurement = "PM2.5 (24hr) [PM2.5 (24hr) TDC Partisol]") %>%
-  mutate(measurement = "PM2.5", site = site)
-
-# load rainfall and meteorology data
-from <- format(min(aqb_day$date), "%Y%m%d")
-to <- format(max(aqb_day$date), "%Y%m%d")
-
-site_rainfall <- filter(site_meteorology_mapping, aq_site == !!site)[["rainfall_site"]]
-
-rainfall <- get_rainfall_data(site_rainfall, from, to)
-
-site_meteo <- filter(site_meteorology_mapping, aq_site == !!site)[["wind_temp_site"]]
-meteo <- get_meteorological_data(site_meteo, from, to)
-
-base_dates <- tibble(date = seq(min(aqb_day$date), max(aqb_day$date), by = "days"))
-aqb_day <- base_dates %>%
-  left_join(aqb_day, by = "date") %>%
-  left_join(rainfall, by = "date") %>%
-  left_join(meteo, by = "date") %>%
-  mutate_at(vars(site), ~ replace_na(., !!site)) %>%
-  mutate_at(vars(measurement), ~ replace_na(., "PM2.5"))
+# site <- "AQ Brightwater at Brightwater North"
+# 
+# aqb_day <- get_aq_data(site = site, measurement = "PM2.5 (24hr) [PM2.5 (24hr) TDC Partisol]") %>%
+#   mutate(measurement = "PM2.5", site = site)
+# 
+# # load rainfall and meteorology data
+# from <- format(min(aqb_day$date), "%Y%m%d")
+# to <- format(max(aqb_day$date), "%Y%m%d")
+# 
+# site_rainfall <- filter(site_meteorology_mapping, aq_site == !!site)[["rainfall_site"]]
+# 
+# rainfall <- get_rainfall_data(site_rainfall, from, to)
+# 
+# site_meteo <- filter(site_meteorology_mapping, aq_site == !!site)[["wind_temp_site"]]
+# meteo <- get_meteorological_data(site_meteo, from, to)
+# 
+# base_dates <- tibble(date = seq(min(aqb_day$date), max(aqb_day$date), by = "days"))
+# aqb_day <- base_dates %>%
+#   left_join(aqb_day, by = "date") %>%
+#   left_join(rainfall, by = "date") %>%
+#   left_join(meteo, by = "date") %>%
+#   mutate_at(vars(site), ~ replace_na(., !!site)) %>%
+#   mutate_at(vars(measurement), ~ replace_na(., "PM2.5"))
 
 ###### All Sites ######
-aq_day <- rbind(aqm_day, aqb_day, aqr_day) %>%
+aq_day <- rbind(aqm_day, aqr_day) %>% # aqb_day
   mutate(
     site = factor(site, levels = site_levels, ordered = TRUE),
     reporting_period = if_else(date %within% reporting_interval, 1, 0)
   )
 
-rm(aqr_pm2p5_day, aqr_pm10_day, aqr_pm2p5_annual, aqr_pm10_annual, aqm_day, aqb_day)
+rm(aqr_pm2p5_day, aqr_pm10_day, aqr_pm2p5_annual, aqr_pm10_annual, aqm_day) # aqb_day
 
 aq_day
 aq_annual
@@ -134,4 +135,4 @@ aq_annual
 aq_day$node <- mapply(calculate_pollution_node, aq_day$wind_kph_24h_avg, aq_day$temp_degc_4h_avg)
 aq_day$normalised_pm <- mapply(normalise_pm10, aq_day$measurement, aq_day$value, aq_day$node)
 
-saveRDS(aq_day, file = "aq_day.RDS")
+saveRDS(aq_day, file = "data/aq_day.RDS")
